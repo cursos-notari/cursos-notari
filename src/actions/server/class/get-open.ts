@@ -2,9 +2,13 @@
 
 import { createServiceClient } from "@/supabase/service-client";
 import { PublicClass } from "@/types/database/class";
+import { cacheLife } from "next/cache";
+import { cache } from "react";
 
-export async function getOpenClasses(): Promise<PublicClass[]> {
+export const getOpenClasses = cache(async (): Promise<PublicClass[]> => {
   "use cache"
+
+  cacheLife('seconds');
 
   const supabase = createServiceClient();
 
@@ -22,4 +26,4 @@ export async function getOpenClasses(): Promise<PublicClass[]> {
   }
 
   return data;
-}
+})

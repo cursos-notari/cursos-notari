@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from 'react'
-import dynamic from 'next/dynamic';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '../../../ui/form';
+import React, { useState, useMemo } from 'react'
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { paymentCardSchema, TPaymentCardSchema } from '@/validation/zod-schemas/payment-card-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,17 +12,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Lock } from 'lucide-react';
 import { detectCardBrand } from '@/utils/detect-card-brand';
 import { formatCardNumber } from '@/utils/format-card-number';
-import { Spinner } from '../../../ui/spinner';
-import 'react-credit-cards-2/dist/es/styles-compiled.css'
+import { Spinner } from '@/components/ui/spinner';
 import { clearSensitiveData, encryptCardData, getPublicKey, prepareCardData, validatePagSeguroSDK } from '@/utils/encryptionHelper';
 import { creditCardCharge } from '@/actions/server/payment/credit-card-charge';
 import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 
-const Cards = dynamic(() => import('react-credit-cards-2'), {
-  ssr: false, // renderiza direto no cliente
-  loading: () => <div className="flex items-center justify-center h-[180px]"><Spinner /></div>
-});
+// import 'react-credit-cards-2/dist/es/styles-compiled.css'
+import dynamic from 'next/dynamic';
+// const Cards = dynamic(() => import('react-credit-cards-2'), {
+//   ssr: false, // renderiza direto no cliente
+//   loading: () => <div className="flex items-center justify-center h-[180px]"><Spinner /></div>
+// });
 
 interface CreditCardFormProps {
   unitAmount: number;
@@ -250,14 +250,14 @@ const CreditCardForm = React.memo(function CreditCardForm({ unitAmount, token }:
 
                 <div className='flex flex-col justify-between pb-8 max-w-[290px] w-1/2 space-y-5'>
                   <div className="relative min-h-[180px]">
-                    <Cards
+                    {/* <Cards
                       number={form.watch('cardNumber')}
                       expiry={form.watch('expiryDate')}
                       cvc={form.watch('cvv')}
                       name={form.watch('holderName')}
                       focused={focused}
                       locale={{ valid: 'VALIDADE' }}
-                    />
+                    /> */}
                   </div>
 
                   {/* informações de segurança */}
