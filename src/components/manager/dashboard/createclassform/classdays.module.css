@@ -1,0 +1,4 @@
+input::selection, textarea::selection {
+  background: #0f172a; /* sua cor */
+  color: #fff;
+}

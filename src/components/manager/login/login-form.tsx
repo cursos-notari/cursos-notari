@@ -1,0 +1,77 @@
+'use client'
+
+import { supabase } from "@/supabase/browser-client"
+import { useRouter } from "next/navigation"
+import React, { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "sonner"
+import { Card, CardContent } from "@/components/ui/card"
+import { formSchema, TLoginFormSchema } from "@/validation/zod-schemas/login-schema"
+import FormContent from "./form-content"
+
+export function LoginForm() {
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
+
+  const form = useForm<TLoginFormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  const handleLoginFormSubmit = async (data: TLoginFormSchema) => {
+    setIsLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    });
+
+    if (error) {
+      let errorMessage: React.ReactNode = "Ocorreu um erro inesperado. Tente novamente mais tarde.";
+
+      switch (error.message) {
+        case 'Invalid login credentials':
+          errorMessage = (
+            <div>
+              <p>E-mail ou senha inválidos.</p>
+              <p>Por favor, verifique seus dados e tente novamente.</p>
+            </div>
+          );
+          break;
+      }
+
+      toast.error(errorMessage, { position: "top-center" });
+
+      setIsLoading(false);
+
+      return;
+    }
+
+    router.push('/admin/dashboard');
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <Card className="overflow-hidden p-0 shadow-lg">
+        <CardContent className="grid p-0 md:grid-cols-2">
+          <FormContent
+            form={form}
+            onSubmit={handleLoginFormSubmit}
+            isLoading={isLoading}
+          />
+          <div className="bg-muted relative hidden md:block">
+            {/*//TODO: TROCAR PRA IMAGE */}
+            <img
+              src="/img/logo-secundary.png"
+              alt="Imagem de fundo"
+              className="absolute top-[50%] -translate-y-1/2 inset-0 w-full object-fill dark:brightness-[0.2] dark:grayscale"
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

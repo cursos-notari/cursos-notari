@@ -1,0 +1,18 @@
+.dialogContent::-webkit-scrollbar {
+  width: 12px;
+}
+
+.dialogContent::-webkit-scrollbar-track {
+  background: var(--background);
+  border-radius: 6px;
+}
+
+.dialogContent::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 6px;
+  border: 2px solid var(--background);
+}
+
+.dialogContent::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary-hover);
+}
