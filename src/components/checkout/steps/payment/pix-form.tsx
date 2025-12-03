@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
-import usePersonalData from '@/hooks/use-personal-data'
+import usePersonalData from '@/hooks/zustand/use-personal-data'
 import { pixFormSchema, PixFormSchema } from '@/validation/zod-schemas/pix-form-validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -23,9 +23,15 @@ export default function PixForm() {
   const personalData = usePersonalData((state) => state.personalData);
 
   const handlePixFormSubmit = async (data: PixFormSchema) => {
-    if(!data.acceptContract || !data.acceptPolicy) return;
+    if(!data.acceptContract || !data.acceptPolicy) {
+      form.setError("root", {
+        message: 'Você precisa aceitar os termos para prosseguir'
+      })
 
-    // const classData = getClassById(supabase, );
+      return
+    };
+
+    // const classData = await getClassById();
     
     // const preRegistration = await createPreRegistration(personalData, );
 

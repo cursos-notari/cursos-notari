@@ -8,7 +8,7 @@ import { cache } from "react";
 export const getOpenClasses = cache(async (): Promise<PublicClass[]> => {
   "use cache"
 
-  cacheLife('seconds');
+  cacheLife("seconds")
 
   const supabase = createServiceClient();
 

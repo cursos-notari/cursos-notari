@@ -2,7 +2,8 @@
 
 import { cache } from "react";
 import { PublicClass } from "@/types/database/class";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { cacheLife } from "next/cache";
+import { createServiceClient } from "@/supabase/service-client";
 
 interface Return {
   success: boolean;
@@ -11,9 +12,18 @@ interface Return {
   message: string;
 }
 
-// a função que realmente busca os dados no banco
-export async function getClassById(supabase: SupabaseClient, classId: string): Promise<Return> {
-  
+export const getClassById = cache(async (classId: string): Promise<Return> => {
+  "use cache"
+
+  cacheLife('seconds');
+
+  const supabase = createServiceClient();
+
+  if(!supabase) return {
+    success: false,
+    message: "Não foi possível criar o cliente supabase",
+  }
+
   const { data, error } = await supabase
     .from('open_classes')
     .select('*')
@@ -34,4 +44,4 @@ export async function getClassById(supabase: SupabaseClient, classId: string): P
     message: 'Turma encontrada com sucesso.',
     data: data
   };
-}
+})

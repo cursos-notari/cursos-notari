@@ -1,18 +1,18 @@
-import { Button } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
-import React from 'react'
+import { Button } from '@/components/ui/button';
+import { PublicClass } from '@/types/database/class';
+import { useCheckoutData } from '@/contexts/class-data-context';
 
 interface ItemsProps {
   className?: string;
-  classData: {
-    id: string;
-    name: string;
-    unitAmount: number;
-  },
   onNext: () => void;
+  classData?: PublicClass;
 }
 
-export default function Items({ className, classData, onNext }: ItemsProps) {
+export default function Items({ className, onNext}: ItemsProps) {
+
+  const { classData } = useCheckoutData();
+
   return (
     <div className={cn('py-7 px-7 bg-background border border-t-0 text-gray-700 space-y-4', className)}>
       <div className='flex justify-between'>
@@ -47,9 +47,9 @@ export default function Items({ className, classData, onNext }: ItemsProps) {
           </div>
         </div>
         <div className='text-end'>
-          <h6 className='text-xs line-through'>R$ {classData.unitAmount},00</h6>
-          <p className='text-sm'>12x <b className='text-lg'>R$ {(classData.unitAmount / 12).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></p>
-          <p className='text-sm'>ou <b>R$ {classData.unitAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b> à vista</p>
+          <h6 className='text-xs line-through'>R$ {classData.registration_fee},00</h6>
+          <p className='text-sm'>12x <b className='text-lg'>R$ {(classData.registration_fee / 12).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></p>
+          <p className='text-sm'>ou <b>R$ {classData.registration_fee.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b> à vista</p>
         </div>
       </div>
       <div className='w-full flex justify-end'>

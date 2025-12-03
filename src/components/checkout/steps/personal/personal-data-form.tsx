@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { personalDataFormSchema, PersonalDataFormSchema } from '@/validation/zod-schemas/personal-data-form-schema'
-import { useCheckout } from '@/contexts/checkout-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -23,17 +22,13 @@ import { getAddressByCEP } from '@/services/get-address-by-cep'
 import { useEffect } from 'react'
 import { Combobox } from '@/components/ui/combobox'
 import { getCitiesByUF } from '@/services/get-cities-by-uf'
-import usePersonalData from '@/hooks/use-personal-data'
+import usePersonalData from '@/hooks/zustand/use-personal-data'
 
 interface PersonalDataFormProps {
-  classData: {
-    id: string;
-    name: string;
-  }
   onNext: () => void;
 }
 
-export default function PersonalDataForm({ classData, onNext }: PersonalDataFormProps) {
+export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
 
   const personalData = usePersonalData((state) => state.personalData);
   const setPersonalData = usePersonalData((state) => state.setPersonalData);
