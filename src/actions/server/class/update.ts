@@ -1,10 +1,10 @@
 'use server'
 
 import { createClient } from '@/supabase/server-client'
-import { TransformedCreateClassFormData } from '@/validation/zod-schemas/create-class-schema'
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { TransformedUpdateClassFormData } from '@/validation/zod-schemas/update-class-schema'
+import { revalidatePath } from 'next/cache'
 
-export async function updateClassAction(classId: string, classData: TransformedCreateClassFormData) {
+export async function updateClassAction(classId: string, classData: TransformedUpdateClassFormData) {
   const supabase = await createClient()
   console.log('teste');
 

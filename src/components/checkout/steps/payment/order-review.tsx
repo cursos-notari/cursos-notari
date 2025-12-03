@@ -1,18 +1,13 @@
-"use client"
+'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { PublicClass } from '@/types/database/class';
+import { useCheckoutData } from '@/contexts/class-data-context';
 import { Info } from 'lucide-react';
 
-interface OrderReviewProps {
-  classInfo: {
-    name: string;
-    registration_fee: number;
-    schedules: string[];
-  }
-}
+export default function OrderReview() {
 
-export default function OrderReview({ classInfo }: OrderReviewProps) {
+  const { classData } = useCheckoutData();
+
   return (
     <aside className='md:sticky top-10 flex flex-col w-full self-start md:max-w-md h-fit'>
       <Card className='rounded-none'>
@@ -25,19 +20,19 @@ export default function OrderReview({ classInfo }: OrderReviewProps) {
 
             <div className='flex justify-between'>
               <div className='flex flex-col'>
-                <p className='font-semibold'>Curso {classInfo.name}</p>
+                <p className='font-semibold'>Curso {classData.name}</p>
                 <span className='text-xs font-medium text-gray-600'>1 Vaga</span>
                 <span></span>
               </div>
               <span className='whitespace-nowrap font-semibold text-green-600'>
-                R$ {classInfo.registration_fee}
+                R$ {classData.registration_fee}
               </span>
             </div>
 
             <div className='flex flex-col justify-between space-y-2'>
               <p className='font-medium'>As aulas acontecerão nos dias:</p>
               <ul className="text-gray-800 font-medium list-disc pl-5 ml-2">
-                {classInfo.schedules?.map((schedule: string, index: number) => (
+                {classData.schedules?.map((schedule: string, index: number) => (
                   <li key={index}>
                     {new Date(schedule).toLocaleString('pt-BR', {
                       weekday: 'long',
@@ -52,7 +47,7 @@ export default function OrderReview({ classInfo }: OrderReviewProps) {
             </div>
 
             <div className='flex bg-muted p-3 space-x-2 text-center rounded-sm'>
-              <Info size={15} className='text-gray-700 mt-[2px]' />
+              <Info size={15} className='text-gray-700 mt-0.5' />
               <p className='text-gray-700 font-medium'>
                 Após realizar o pagamento, você receberá um <br /> e-mail com os ingressos para as aulas.
               </p>

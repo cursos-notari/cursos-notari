@@ -8,15 +8,7 @@ import PaymentMethods from '@/components/checkout/steps/payment/payment-methods'
 import { CircleUserRound, CreditCard, LucideProps, ShoppingBag } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
-interface CheckoutStepsProps {
-  classData: {
-    id: string;
-    name: string;
-    registration_fee: number;
-  }
-}
-
-export default function CheckoutSteps({ classData }: CheckoutStepsProps) {
+export default function CheckoutSteps() {
 
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [maxStepReached, setMaxStepReached] = useState<number>(0);
@@ -47,66 +39,58 @@ export default function CheckoutSteps({ classData }: CheckoutStepsProps) {
         text: 'Meus itens',
         component: Items,
         icon: ShoppingBag,
-        props: {
-          classData: {
-            id: classData.id,
-            name: classData.name,
-            unitAmount: classData.registration_fee
-          }
-        }
+        props: {}
       },
       {
         id: 1,
         text: 'Meus dados',
         icon: CircleUserRound,
         component: PersonalDataForm,
-        props: { classData: { id: classData.id, name: classData.name } }
+        props: {}
       },
       {
         id: 2,
         icon: CreditCard,
         text: 'Informações de pagamento',
         component: PaymentMethods,
-        props: { unitAmount: classData.registration_fee }
+        props: {}
       },
     ];
 
-  const commonProps = {
-    onNext: nextStep
-  };
+  const commonProps = { onNext: nextStep };
 
   return (
-      <div className='flex w-full max-w-2xl gap-10'>
-        <div className='flex flex-col gap-8 w-full'>
-          {steps.map((step) => {
-            const isActive = step.id === currentStep;
-            const isPrevious = step.id < currentStep;
-            const isClickable = isPrevious;
+    <div className='flex w-full max-w-2xl gap-10'>
+      <div className='flex flex-col gap-8 w-full'>
+        {steps.map((step) => {
+          const isActive = step.id === currentStep;
+          const isPrevious = step.id < currentStep;
+          const isClickable = isPrevious;
 
-            return (
-              <div className='w-full' key={step.id}>
-                <StepButton
-                  icon={step.icon}
-                  className={cn(
-                    'flex items-center w-full text-gray-700 font-semibold transition-colors shadow-sm border gap-2 py-5 pl-5 bg-background justify-between pr-5',
-                    isClickable && 'cursor-pointer hover:bg-background/70'
-                  )}
-                  text={step.text}
-                  onClick={isClickable ? () => goToStep(step.id) : undefined}
-                >
-                  {isPrevious && <span className='text-sm text-muted-foreground'>Alterar</span>}
-                </StepButton>
-                {isActive && (
-                  <step.component
-                    key={step.id}
-                    {...commonProps}
-                    {...step.props}
-                  />
+          return (
+            <div className='w-full' key={step.id}>
+              <StepButton
+                icon={step.icon}
+                className={cn(
+                  'flex items-center w-full text-gray-700 font-semibold transition-colors shadow-sm border gap-2 py-5 pl-5 bg-background justify-between pr-5',
+                  isClickable && 'cursor-pointer hover:bg-background/70'
                 )}
-              </div>
-            )
-          })}
-        </div>
+                text={step.text}
+                onClick={isClickable ? () => goToStep(step.id) : undefined}
+              >
+                {isPrevious && <span className='text-sm text-muted-foreground'>Alterar</span>}
+              </StepButton>
+              {isActive && (
+                <step.component
+                  key={step.id}
+                  {...commonProps}
+                  {...step.props}
+                />
+              )}
+            </div>
+          )
+        })}
       </div>
+    </div>
   )
 }

@@ -52,15 +52,14 @@ export default function PaymentMethods({ qrCode, unitAmount, token, customerName
             <CreditCardForm token={token} unitAmount={unitAmount} />
           )}
 
-          {selectedPaymentMethod === PayMethod.PIX && (
-            <PixForm/>
-          )}
+          {selectedPaymentMethod === PayMethod.PIX && <PixForm/>}
 
           {selectedPaymentMethod === PayMethod.BOLETO && (
             <div className="text-center p-8 min-w-2xl">
               <p className="text-muted-foreground">O pagamento por boleto não está disponível</p>
             </div>
           )}
+          
           <div className="flex items-center justify-center gap-1 mt-7">
             <ShieldCheck size={18} color='oklch(62.7% 0.194 149.214)'/>
             <p className='text-sm text-center text-gray-500 font-medium'>Suas informações estão seguras</p>

@@ -4,7 +4,7 @@ import { PublicClass } from "@/types/database/class";
 interface ClassDataState {
   classData: PublicClass | null;
   setClassData: (data: PublicClass) => void;
-}
+}''
 
 const useClassData = create<ClassDataState>((set) => ({
   classData: null,
