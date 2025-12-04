@@ -5,18 +5,21 @@ import { PreRegistrationStatus } from "@/types/database/pre-registration";
 import { personalDataFormSchema } from "@/validation/zod-schemas/personal-data-form-schema";
 
 export interface CreatePreRegistrationParams {
-  name: string;
-  surname: string;
-  email: string;
-  cpf: string;
-  phone: string;
-  street: string;
-  number: string;
-  complement?: string;
-  locality: string;
-  city: string;
-  regionCode: string;
-  postalCode: string;
+  personalData: {
+    name: string;
+    surname: string;
+    email: string;
+    cpf: string;
+    phone: string;
+    street: string;
+    number: string;
+    complement?: string;
+    locality: string;
+    city: string;
+    regionCode: string;
+    postalCode: string;
+  }
+  classId: string
 }
 
 interface CreatePreRegistrationReturn {
@@ -26,8 +29,8 @@ interface CreatePreRegistrationReturn {
   id?: string;
 }
 
-export async function createPreRegistration(personalData: CreatePreRegistrationParams, classId: string): Promise<CreatePreRegistrationReturn> {
-  
+export async function createPreRegistration({ classId, personalData }: CreatePreRegistrationParams): Promise<CreatePreRegistrationReturn> {
+
   const validated = personalDataFormSchema.safeParse(personalData);
 
   if (!validated.success) {
@@ -40,8 +43,8 @@ export async function createPreRegistration(personalData: CreatePreRegistrationP
 
   const supabase = createServiceClient();
 
-  if(!supabase) return { success: false }
-  
+  if (!supabase) return { success: false }
+
   const { data: result, error } = await supabase.rpc("create_pre_registration", {
     p_class_id: classId,
     p_name: personalData.name,
@@ -68,6 +71,6 @@ export async function createPreRegistration(personalData: CreatePreRegistrationP
   }
 
   if (!result.success) console.error(`${result.code} : ${result.message}`);
-    
+
   return result;
 }
