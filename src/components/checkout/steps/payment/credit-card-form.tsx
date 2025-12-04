@@ -20,17 +20,16 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 // import 'react-credit-cards-2/dist/es/styles-compiled.css'
 import dynamic from 'next/dynamic';
+import { createPreRegistration } from '@/actions/server/pre-registration/create-pre-registration';
+import usePersonalData from '@/hooks/zustand/use-personal-data';
+import { useCheckoutData } from '@/contexts/class-data-context';
+
 // const Cards = dynamic(() => import('react-credit-cards-2'), {
 //   ssr: false, // renderiza direto no cliente
 //   loading: () => <div className="flex items-center justify-center h-[180px]"><Spinner /></div>
 // });
 
-interface CreditCardFormProps {
-  unitAmount: number;
-  token: string;
-}
-
-const CreditCardForm = React.memo(function CreditCardForm({ unitAmount, token }: CreditCardFormProps) {
+const CreditCardForm = React.memo(function CreditCardForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -62,6 +61,10 @@ const CreditCardForm = React.memo(function CreditCardForm({ unitAmount, token }:
     [form.watch('cardNumber')]
   );
 
+  const personalData = usePersonalData(state => state.personalData)!;
+
+  const { classData } = useCheckoutData()
+
   const handleCreditCardFormSubmit = async (creditCardData: TPaymentCardSchema,) => {
     try {
       setIsSubmitting(true);
@@ -77,14 +80,16 @@ const CreditCardForm = React.memo(function CreditCardForm({ unitAmount, token }:
       // limpa dados sensíveis vindos do formulário
       clearSensitiveData(creditCardData);
 
-      const res = await creditCardCharge(token, {
+      const preRegistration = await createPreRegistration(personalData, classData.id);
+
+      if (!preRegistration.success || !preRegistration.id) throw new Error("Não foi possível criar o registro");
+
+      const res = await creditCardCharge(preRegistration.id, {
         installments: creditCardData.installments,
         cardToken: encryptedCardToken
       });
 
       if (!res.success) throw new Error(res.message);
-
-
 
     } catch (e) {
       console.error('Erro no processamento do pagamento:', e);
@@ -233,7 +238,7 @@ const CreditCardForm = React.memo(function CreditCardForm({ unitAmount, token }:
                             <SelectContent>
                               {installmentOptions.map((installment) => (
                                 <SelectItem key={installment} value={installment.toString()}>
-                                  {installment}x de R$ {(unitAmount / installment).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                  {installment}x de R$ {(classData.registration_fee / installment).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                   {installment === 1 ? ' à vista' : ''}
                                 </SelectItem>
                               ))}

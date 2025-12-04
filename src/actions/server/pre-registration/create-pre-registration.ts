@@ -1,4 +1,4 @@
-"use server"
+'use server'
 
 import { createServiceClient } from "@/supabase/service-client";
 import { PreRegistrationStatus } from "@/types/database/pre-registration";
@@ -23,11 +23,7 @@ interface CreatePreRegistrationReturn {
   success: boolean;
   message?: string;
   code?: string;
-  data?: {
-    status: PreRegistrationStatus;
-    token: string;
-    attempts_reset: boolean;
-  }
+  id?: string;
 }
 
 export async function createPreRegistration(personalData: CreatePreRegistrationParams, classId: string): Promise<CreatePreRegistrationReturn> {

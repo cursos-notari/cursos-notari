@@ -1,4 +1,5 @@
-import { createClient } from '@/supabase/server-client';
+'use server'
+
 import { createServiceClient } from '@/supabase/service-client';
 import { PreRegistration } from '@/types/database/pre-registration';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -10,7 +11,7 @@ export interface GetPreRegistrationByTokenResult {
   data?: PreRegistration;
 }
 
-export async function getPreRegistrationByToken(token: string, supabase?: SupabaseClient): Promise<GetPreRegistrationByTokenResult> {
+export async function getPreRegistrationById(id: string, supabase?: SupabaseClient): Promise<GetPreRegistrationByTokenResult> {
   if (!supabase) supabase = createServiceClient() as SupabaseClient;
 
   if (!supabase) {
@@ -20,8 +21,8 @@ export async function getPreRegistrationByToken(token: string, supabase?: Supaba
     }
   }
 
-  const { data, error } = await supabase.rpc('get_pre_registration_by_token', {
-    p_token: token
+  const { data, error } = await supabase.rpc('get_pre_registration_by_id', {
+    p_id: id
   });
 
   if (error) {

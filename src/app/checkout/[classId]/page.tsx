@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getClassById } from "@/actions/server/class/get-by-id";
+import { getClassById } from "@/actions/server/class/get-class-by-id";
 import OrderReview from "@/components/checkout/steps/payment/order-review";
 import { createServiceClient } from "@/supabase/service-client";
 import CheckoutSteps from "./checkout-steps";

@@ -1,6 +1,6 @@
-import { getClassById } from '@/actions/server/class/get-by-id'
+import { getClassById } from '@/actions/server/class/get-class-by-id'
 import { createPagBankOrder } from '@/actions/server/payment/create-pagbank-order'
-import { createPreRegistration } from '@/actions/server/pre-registration/create'
+import { createPreRegistration } from '@/actions/server/pre-registration/create-pre-registration'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
