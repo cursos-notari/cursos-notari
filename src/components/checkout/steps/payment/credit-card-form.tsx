@@ -18,16 +18,16 @@ import { creditCardCharge } from '@/actions/server/payment/credit-card-charge';
 import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 
-// import 'react-credit-cards-2/dist/es/styles-compiled.css'
+import 'react-credit-cards-2/dist/es/styles-compiled.css'
 import dynamic from 'next/dynamic';
 import { createPreRegistration } from '@/actions/server/pre-registration/create-pre-registration';
 import usePersonalData from '@/hooks/zustand/use-personal-data';
 import { useCheckoutData } from '@/contexts/class-data-context';
 
-// const Cards = dynamic(() => import('react-credit-cards-2'), {
-//   ssr: false, // renderiza direto no cliente
-//   loading: () => <div className="flex items-center justify-center h-[180px]"><Spinner /></div>
-// });
+const Cards = dynamic(() => import('react-credit-cards-2'), {
+  ssr: false, // renderiza direto no cliente
+  loading: () => <div className="flex items-center justify-center h-[180px]"><Spinner /></div>
+});
 
 const CreditCardForm = React.memo(function CreditCardForm() {
 
@@ -80,7 +80,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
       // limpa dados sensíveis vindos do formulário
       clearSensitiveData(creditCardData);
 
-      const preRegistration = await createPreRegistration(personalData, classData.id);
+      const preRegistration = await createPreRegistration({ personalData, classId: classData.id  });
 
       if (!preRegistration.success || !preRegistration.id) throw new Error("Não foi possível criar o registro");
 
@@ -255,14 +255,14 @@ const CreditCardForm = React.memo(function CreditCardForm() {
 
                 <div className='flex flex-col justify-between pb-8 max-w-[290px] w-1/2 space-y-5'>
                   <div className="relative min-h-[180px]">
-                    {/* <Cards
+                    <Cards
                       number={form.watch('cardNumber')}
                       expiry={form.watch('expiryDate')}
                       cvc={form.watch('cvv')}
                       name={form.watch('holderName')}
                       focused={focused}
                       locale={{ valid: 'VALIDADE' }}
-                    /> */}
+                    />
                   </div>
 
                   {/* informações de segurança */}

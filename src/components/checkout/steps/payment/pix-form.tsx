@@ -1,3 +1,5 @@
+'use client'
+
 import { getClassById } from '@/actions/server/class/get-class-by-id'
 import { createPagBankOrder } from '@/actions/server/payment/create-pagbank-order'
 import { createPreRegistration } from '@/actions/server/pre-registration/create-pre-registration'
@@ -5,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
+import { useCheckoutData } from '@/contexts/class-data-context'
 import usePersonalData from '@/hooks/zustand/use-personal-data'
 import { pixFormSchema, PixFormSchema } from '@/validation/zod-schemas/pix-form-validation'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -20,10 +23,14 @@ export default function PixForm() {
     }
   });
 
-  const personalData = usePersonalData((state) => state.personalData);
+  const { classData } = useCheckoutData();
+
+  const personalData = usePersonalData((state) => state.personalData)!;
+
+  if (!personalData) throw new Error("Dados pessoais não recebidos");
 
   const handlePixFormSubmit = async (data: PixFormSchema) => {
-    if(!data.acceptContract || !data.acceptPolicy) {
+    if (!data.acceptContract || !data.acceptPolicy) {
       form.setError("root", {
         message: 'Você precisa aceitar os termos para prosseguir'
       })
@@ -31,9 +38,9 @@ export default function PixForm() {
       return
     };
 
-    // const classData = await getClassById();
-    
-    // const preRegistration = await createPreRegistration(personalData, );
+    const preRegistration = await createPreRegistration({ personalData, classId: classData.id });
+
+    console.log(preRegistration.id);
 
     // const newOrder = await createPagBankOrder(supabase, preRegistration);
   }
@@ -107,7 +114,7 @@ export default function PixForm() {
             <Button
               type="submit"
               className="w-full bg-green-600 hover:bg-green-700 cursor-pointer"
-              // disabled={isSubmitting}
+            // disabled={isSubmitting}
             >
               {/* {isSubmitting ? <><Spinner />Processando</> : 'Finalizar pedido'} */}
               Finalizar pedido
