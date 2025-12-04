@@ -1,8 +1,12 @@
-// DELETE - DELETA PRÉ-INSCRIÇÃO COM BASE NO ID
+'use server'
 
-import { supabase } from "@/supabase/browser-client";
+import { createServiceClient  } from "@/supabase/service-client";
 
 export async function deletePreRegistrationById(preRegistrationId: string) {
+  const supabase = createServiceClient();
+
+  if(!supabase) return { success: false }
+
   const { error } = await supabase
     .from("pre_registrations")
     .delete()

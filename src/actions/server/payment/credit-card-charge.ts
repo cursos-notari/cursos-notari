@@ -1,7 +1,7 @@
-"use server";
+'use server';
 
 import { createServiceClient } from "@/supabase/service-client";
-import { getPreRegistrationByToken } from "../pre-registration/get-pre-registration-by-token";
+import { getPreRegistrationById } from "../pre-registration/get-pre-registration-by-id";
 import { confirmPayment } from "../pre-registration/confirm-payment";
 
 export interface CreditCardChargeResult {

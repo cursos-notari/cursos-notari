@@ -6,7 +6,6 @@ import { revalidatePath } from 'next/cache'
 
 export async function updateClassAction(classId: string, classData: TransformedUpdateClassFormData) {
   const supabase = await createClient()
-  console.log('teste');
 
   const { data: { user } } = await supabase.auth.getUser()
 

@@ -1,4 +1,4 @@
-"use server"
+'use server'
 
 import { Class } from "@/types/database/class";
 import { SupabaseClient } from "@supabase/supabase-js";

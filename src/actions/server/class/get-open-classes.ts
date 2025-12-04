@@ -1,4 +1,4 @@
-"use server"
+'use server'
 
 import { createServiceClient } from "@/supabase/service-client";
 import { PublicClass } from "@/types/database/class";

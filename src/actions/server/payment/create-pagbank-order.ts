@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 import { PublicClass } from "@/types/database/class";
 import { PreRegistration } from "@/types/database/pre-registration";
