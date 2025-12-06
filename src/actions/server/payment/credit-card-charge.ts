@@ -16,7 +16,7 @@ export interface TokenizedPaymentData {
 }
 
 export async function creditCardCharge(
-  token: string,
+  preRegistrationId: string,
   creditCardToken: TokenizedPaymentData
 ): Promise<CreditCardChargeResult> {
 
@@ -25,7 +25,7 @@ export async function creditCardCharge(
 
     if (!supabase) throw new Error('Supabase client not found');
 
-    const preRegistration = await getPreRegistrationByToken(token, supabase);
+    const preRegistration = await getPreRegistrationById(preRegistrationId, supabase);
 
     if (!preRegistration.success || !preRegistration.data) {
       return {
@@ -93,24 +93,24 @@ export async function creditCardCharge(
       };
     }
     
-    const confirmResult = await confirmPayment({
-      token,
-      orderId,
-      chargeData: responseData, // salva os dados completos da resposta
-    });
+    // const confirmResult = await confirmPayment({
+    //   preRegistrationId,
+    //   orderId,
+    //   chargeData: responseData, // salva os dados completos da resposta
+    // });
 
-    if (!confirmResult.success) {
-      console.error("CRÍTICO: Pagamento aprovado mas não confirmado no DB", {
-        token,
-        orderId,
-        error: confirmResult.message
-      });
+    // if (!confirmResult.success) {
+    //   console.error("CRÍTICO: Pagamento aprovado mas não confirmado no DB", {
+    //     preRegistrationId,
+    //     orderId,
+    //     error: confirmResult.message
+    //   });
       
-      return {
-        success: false,
-        message: "Pagamento aprovado, mas houve um erro ao processar. Entre em contato com o suporte informando o código: " + orderId,
-      };
-    }
+    //   return {
+    //     success: false,
+    //     message: "Pagamento aprovado, mas houve um erro ao processar. Entre em contato com o suporte informando o código: " + orderId,
+    //   };
+    // }
 
     return {
       success: true,

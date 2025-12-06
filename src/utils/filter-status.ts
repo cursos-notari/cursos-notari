@@ -1,5 +1,5 @@
 import { StatusEnum, statuses } from '@/constants/statuses';
-import { Class } from '@/types/database/class';
+import { Class } from '@/types/interfaces/database/class';
 
 export function filterStatus(classData: Class) {
   switch (classData.status) {

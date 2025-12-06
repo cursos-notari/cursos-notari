@@ -1,23 +1,24 @@
 'use server'
+import 'server-only'
 
 import { createServiceClient } from '@/supabase/service-client';
-import { PreRegistration } from '@/types/database/pre-registration';
+import { PreRegistration } from '@/types/interfaces/database/pre-registration';
 import { SupabaseClient } from '@supabase/supabase-js';
 
-export interface GetPreRegistrationByTokenResult {
+export interface GetPreRegistrationByIdResult {
   success: boolean;
   message: string;
   code?: string;
   data?: PreRegistration;
 }
 
-export async function getPreRegistrationById(id: string, supabase?: SupabaseClient): Promise<GetPreRegistrationByTokenResult> {
-  if (!supabase) supabase = createServiceClient() as SupabaseClient;
+export async function getPreRegistrationById(id: string): Promise<GetPreRegistrationByIdResult> {
+  const supabase = createServiceClient();
 
   if (!supabase) {
     return {
       success: false,
-      message: 'Erro interno: cliente Supabase não disponível'
+      message: 'Erro interno: cliente supabase não disponível'
     }
   }
 

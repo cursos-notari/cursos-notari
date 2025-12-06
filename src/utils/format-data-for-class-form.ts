@@ -1,4 +1,4 @@
-import { Class } from "@/types/database/class";
+import { Class } from "@/types/interfaces/database/class";
 
 const formatSchedulesForClassForm = (schedules: string[] | null | undefined) => {
   // se não houverem dias de aula retorna um valor default

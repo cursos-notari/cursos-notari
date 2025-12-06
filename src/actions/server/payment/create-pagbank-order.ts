@@ -1,18 +1,23 @@
 'use server';
 
-import { PublicClass } from "@/types/database/class";
-import { PreRegistration } from "@/types/database/pre-registration";
-import { Order } from "@/types/interfaces/order";
+import { PublicClass } from "@/types/interfaces/database/class";
+import { Order } from "@/types/interfaces/payment/pagbank/order";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { createServiceClient } from "@/supabase/service-client";
+import { PreRegistration } from "@/types/interfaces/database/pre-registration";
 
 // o qrcode é válido por 1 hora
 const EXPIRATION_TIME = 1;
 
-export async function createPagBankOrder(
-  supabase: SupabaseClient,
+interface CreatePagBankOrderParams {
   classData: PublicClass,
   preRegistrationData: PreRegistration
-) {
+}
+
+export async function createPagBankOrder({
+  classData,
+  preRegistrationData
+}: CreatePagBankOrderParams) {
 
   // confere parâmetros
   if (!preRegistrationData) {
@@ -81,6 +86,10 @@ export async function createPagBankOrder(
     }
 
     const order: Order = await response.json();
+
+    const supabase = createServiceClient();
+
+    if (!supabase) return { success: false }
 
     // salva os dados da ordem no banco de dados
     const { error: updateError } = await supabase

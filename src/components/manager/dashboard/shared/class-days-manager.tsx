@@ -5,7 +5,7 @@ import { Controller } from 'react-hook-form';
 import { DatePicker } from '@/components/ui/date-picker';
 import { IconTrash } from '@tabler/icons-react';
 import { Label } from '@/components/ui/label';
-import { ClassFormWithDays } from '@/types/database/class';
+import { ClassFormWithDays } from '@/types/interfaces/database/class';
 
 interface ClassDaysManagerProps<T extends ClassFormWithDays> {
   control: Control<T>;

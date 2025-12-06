@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { PublicClass } from '@/types/database/class';
+import { PublicClass } from '@/types/interfaces/database/class';
 
 export default function PublicClassCard({ class: classData }: { class: PublicClass }) {
   return (

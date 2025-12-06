@@ -94,6 +94,8 @@ export const personalDataFormSchema = z.object({
         .regex(/^\d+$/, "CEP deve conter apenas números")
     ),
 
+  state: z.string().nonempty("Informe o estado"),
+
   // acceptTerms: z.boolean()
   //   .refine((val) => val === true, "Você deve aceitar os termos de política de privacidade"),
 

@@ -2,15 +2,18 @@
 
 import { getClassById } from '@/actions/server/class/get-class-by-id'
 import { createPagBankOrder } from '@/actions/server/payment/create-pagbank-order'
+import { processPixPayment } from '@/actions/server/payment/process-pix-payment'
 import { createPreRegistration } from '@/actions/server/pre-registration/create-pre-registration'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
+import { Spinner } from '@/components/ui/spinner'
 import { useCheckoutData } from '@/contexts/class-data-context'
 import usePersonalData from '@/hooks/zustand/use-personal-data'
 import { pixFormSchema, PixFormSchema } from '@/validation/zod-schemas/pix-form-validation'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 export default function PixForm() {
@@ -23,6 +26,8 @@ export default function PixForm() {
     }
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { classData } = useCheckoutData();
 
   const personalData = usePersonalData((state) => state.personalData)!;
@@ -30,6 +35,8 @@ export default function PixForm() {
   if (!personalData) throw new Error("Dados pessoais não recebidos");
 
   const handlePixFormSubmit = async (data: PixFormSchema) => {
+
+
     if (!data.acceptContract || !data.acceptPolicy) {
       form.setError("root", {
         message: 'Você precisa aceitar os termos para prosseguir'
@@ -38,11 +45,22 @@ export default function PixForm() {
       return
     };
 
-    const preRegistration = await createPreRegistration({ personalData, classId: classData.id });
+    try {
+      const preRegistration = await createPreRegistration({ 
+        classId: classData.id,
+        personalData 
+      });
 
-    console.log(preRegistration.id);
+      const res = await processPixPayment({
+        classData,
+        preRegistrationId: preRegistration.id,
+      });
 
-    // const newOrder = await createPagBankOrder(supabase, preRegistration);
+    } catch (error) {
+      form.setError("root", {
+        message: 'Erro ao processar pagamento'
+      })
+    }
   }
 
 
@@ -114,10 +132,9 @@ export default function PixForm() {
             <Button
               type="submit"
               className="w-full bg-green-600 hover:bg-green-700 cursor-pointer"
-            // disabled={isSubmitting}
+              disabled={form.formState.isSubmitting}
             >
-              {/* {isSubmitting ? <><Spinner />Processando</> : 'Finalizar pedido'} */}
-              Finalizar pedido
+              {form.formState.isSubmitting ? <><Spinner />Processando</> : 'Finalizar pedido'}
             </Button>
           </form>
         </Form>

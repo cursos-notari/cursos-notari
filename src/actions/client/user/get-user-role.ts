@@ -1,5 +1,5 @@
 import { supabase } from '@/supabase/browser-client'
-import type { RoleType } from '@/types/database/role-type'
+import type { RoleType } from '@/types/interfaces/database/role-type'
 
 export async function getUserRole(): Promise<RoleType | null> {
   const { data: { user } } = await supabase.auth.getUser()

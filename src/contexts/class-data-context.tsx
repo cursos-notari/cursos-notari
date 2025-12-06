@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext } from 'react'
-import { PublicClass } from '@/types/database/class'
+import { PublicClass } from '@/types/interfaces/database/class'
 
 interface CheckoutContextValue {
   classData: PublicClass

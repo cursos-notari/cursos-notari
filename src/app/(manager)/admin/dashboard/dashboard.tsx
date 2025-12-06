@@ -1,7 +1,7 @@
 'use client'
 
 import { use, useMemo, Suspense, useCallback } from "react";
-import { Class } from "@/types/database/class";
+import { Class } from "@/types/interfaces/database/class";
 import CreateClassCard from "@/components/manager/dashboard/create-class-card";
 import { MemoizedClassCard } from "@/components/manager/dashboard/memoized-class-card";
 import { DialogManager } from "@/components/manager/dashboard/dialog-manager";

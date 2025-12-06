@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Copy, Check } from 'lucide-react';
-import { QrCode } from '@/types/interfaces/order';
+import { QrCode } from '@/types/interfaces/pagbank/order';
 
 interface PixDisplayProps {
   qrCodeData: QrCode

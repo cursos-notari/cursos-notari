@@ -10,11 +10,11 @@ export interface ConfirmPaymentResult {
 }
 
 export async function confirmPayment({
-  token,
+  preRegistrationId,
   orderId,
   chargeData,
 }: {
-  token: string;
+  preRegistrationId: string;
   orderId: string;
   chargeData: any;
 }): Promise<ConfirmPaymentResult> {
@@ -29,7 +29,7 @@ export async function confirmPayment({
     }
 
     const { data, error } = await supabase.rpc('confirm_payment', {
-      p_token: token,
+      p_id: preRegistrationId,
       p_order_id: orderId,
       p_charge_data: chargeData
     });

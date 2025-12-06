@@ -11,6 +11,7 @@ export const defaultValuesMock = {
   locality: 'Centro',
   city: 'São Paulo',
   regionCode: 'SP',
+  state: 'São Paulo',
   postalCode: '01000000',
   acceptTerms: true,
   acceptEmails: false,

@@ -35,7 +35,11 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
 
   const form = useForm<PersonalDataFormSchema>({
     resolver: zodResolver(personalDataFormSchema),
-    // defaultValues: personalData || {
+    // defaultValues: {
+    //   ...personalData,
+    //   state: 'São Paulo',
+    //   regionCode: 'SP'
+    // } || {
     //   name: '',
     //   surname: '',
     //   cpf: '',
@@ -49,6 +53,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
     //   locality: '',
     //   city: '',
     //   regionCode: 'SP',
+    //   state: 'São Paulo',
     //   postalCode: '',
     // },
     defaultValues: defaultValuesMock,
@@ -79,7 +84,8 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
       street: data.logradouro || '',
       locality: data.bairro || '',
       city: data.localidade || '',
-      regionCode: data.uf || '',
+      regionCode: 'SP',
+      state: 'São Paulo',
     }),
   })
 
@@ -400,9 +406,11 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                       <FormControl>
                         <Input
                           className='selection:bg-sky-500'
-                          value="SP"
                           disabled
                           readOnly
+                          {...field}
+                          value="SP" // Sempre SP
+                          onChange={() => {}} // Previne qualquer mudança
                         />
                       </FormControl>
                       <FormMessage />
@@ -439,6 +447,24 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                 />
               </div>
             </fieldset>
+
+            {/* Campo oculto para state */}
+            <FormField
+              control={form.control}
+              name="state"
+              render={({ field }) => (
+                <FormItem className="hidden">
+                  <FormControl>
+                    <Input 
+                      type="hidden" 
+                      {...field} 
+                      value="São Paulo" 
+                      onChange={() => {}} // Previne qualquer mudança
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
             {/* Botão de Submit */}
             <Button
