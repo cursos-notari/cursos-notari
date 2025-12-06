@@ -1,7 +1,7 @@
 'use server'
 
 import { createServiceClient } from "@/supabase/service-client";
-import { PublicClass } from "@/types/database/class";
+import { PublicClass } from "@/types/interfaces/database/class";
 import { cacheLife } from "next/cache";
 import { cache } from "react";
 

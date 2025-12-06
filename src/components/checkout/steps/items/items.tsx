@@ -1,6 +1,6 @@
 import { cn } from '@/utils/cn';
 import { Button } from '@/components/ui/button';
-import { PublicClass } from '@/types/database/class';
+import { PublicClass } from '@/types/interfaces/database/class';
 import { useCheckoutData } from '@/contexts/class-data-context';
 
 interface ItemsProps {

@@ -23,7 +23,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import ConfirmUnsavedExit from '../shared/confirm-unsaved-exit';
 
 // types
-import { Class } from '@/types/database/class'; // formato vindo do banco
+import { Class } from '@/types/interfaces/database/class'; // formato vindo do banco
 
 // estilos
 import styles from '../createclassform/create-class-dialog.module.css';

@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, lazy, memo } from 'react'
-import { Class } from '@/types/database/class'
+import { Class } from '@/types/interfaces/database/class'
 import { TransformedCreateClassFormData } from '@/validation/zod-schemas/create-class-schema'
 import { ClassDialogSkeleton } from './shared/class-dialog-skeleton'
 import { DeleteClassDialog } from './delete-class-dialog'

@@ -1,24 +1,10 @@
 'use server'
 
 import { createServiceClient } from "@/supabase/service-client";
-import { PreRegistrationStatus } from "@/types/database/pre-registration";
-import { personalDataFormSchema } from "@/validation/zod-schemas/personal-data-form-schema";
+import { PersonalDataFormSchema, personalDataFormSchema } from "@/validation/zod-schemas/personal-data-form-schema";
 
 export interface CreatePreRegistrationParams {
-  personalData: {
-    name: string;
-    surname: string;
-    email: string;
-    cpf: string;
-    phone: string;
-    street: string;
-    number: string;
-    complement?: string;
-    locality: string;
-    city: string;
-    regionCode: string;
-    postalCode: string;
-  }
+  personalData: PersonalDataFormSchema
   classId: string
 }
 
@@ -58,6 +44,7 @@ export async function createPreRegistration({ classId, personalData }: CreatePre
     p_locality: personalData.locality,
     p_city: personalData.city,
     p_region_code: personalData.regionCode,
+    p_state: personalData.state,
     p_postal_code: personalData.postalCode,
   });
 

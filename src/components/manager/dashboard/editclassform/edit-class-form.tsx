@@ -21,7 +21,7 @@ import { StatusEnum, statuses } from '@/constants/statuses';
 // type zod
 import { UpdateClassFormData } from '@/validation/zod-schemas/update-class-schema';
 import { Loader2Icon } from 'lucide-react';
-import { Class } from '@/types/database/class';
+import { Class } from '@/types/interfaces/database/class';
 import { filterStatus } from '@/utils/filter-status';
 
 interface Props {

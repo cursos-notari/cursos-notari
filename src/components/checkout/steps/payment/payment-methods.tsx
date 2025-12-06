@@ -4,7 +4,7 @@ import { lazy, Suspense, useState } from 'react'
 import dynamic from 'next/dynamic';
 import { PayMethod } from '@/types/enum/payment-method';
 import { Spinner } from '../../../ui/spinner';
-import { QrCode } from '@/types/interfaces/order';
+import { QrCode } from '@/types/interfaces/pagbank/order';
 import { PaymentMethodSelectorSkeleton } from '@/components/skeletons';
 import { Shield, ShieldCheck } from 'lucide-react';
 import PixForm from './pix-form';

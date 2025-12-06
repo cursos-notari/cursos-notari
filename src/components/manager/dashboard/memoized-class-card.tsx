@@ -4,7 +4,7 @@ import React, { memo, useMemo } from "react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardAction } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ClassCardActions } from "./class-card-actions"
-import { Class } from "@/types/database/class"
+import { Class } from "@/types/interfaces/database/class"
 import { statuses } from "@/constants/statuses"
 import { formatCurrency } from "@/utils/format-currency"
 

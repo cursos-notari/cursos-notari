@@ -1,5 +1,5 @@
 import { supabase } from "@/supabase/browser-client";
-import type { CheckEmailResult } from "@/types/database/pre-registration";
+import type { CheckEmailResult } from "@/types/interfaces/database/pre-registration";
 
 interface CheckEmailInput {
   email: string;

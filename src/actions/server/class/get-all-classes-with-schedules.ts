@@ -1,6 +1,6 @@
 'use server'
 
-import { Class } from "@/types/database/class";
+import { Class } from "@/types/interfaces/database/class";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export async function getAllClassesWithSchedules(supabase: SupabaseClient): Promise<Class[]> {

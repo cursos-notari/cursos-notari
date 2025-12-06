@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useReducer } from 'react'
-import { Class } from '@/types/database/class'
+import { Class } from '@/types/interfaces/database/class'
 import { useClassOperations } from './use-class-operations'
 
 // types
