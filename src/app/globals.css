@@ -51,14 +51,14 @@
       var(--semidark-blue),
       var(--primary-blue),
       var(--light-blue));
-      
+
   --left-linear-bg:
     linear-gradient(90deg,
       #009EFF,
-      #35B2FF, 
+      #35B2FF,
       #6BC7FF,
       #8ED4FF);
-      
+
   --radius: 0.625rem;
   --background: oklch(100% 0.00011 271.152);
   --foreground: oklch(0.145 0 0);
@@ -127,11 +127,6 @@ body {
   font-weight: 600;
 }
 
-/* !  ver se o tailwind não tem classe melhor */
-.altBg {
-  background: var(--bg-acent);
-}
-
 .emphasis {
   background-color: var(--primary-blue);
   -webkit-background-clip: text;
@@ -154,6 +149,17 @@ a:hover {
     color-scheme: light;
   }
 }
+
+@keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-20px);
+    }
+  }
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -191,6 +197,7 @@ a:hover {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --animate-float: float 3s ease-in-out infinite;
 }
 
 .dark {

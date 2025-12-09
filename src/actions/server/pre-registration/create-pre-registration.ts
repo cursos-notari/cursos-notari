@@ -16,7 +16,6 @@ interface CreatePreRegistrationReturn {
 }
 
 export async function createPreRegistration({ classId, personalData }: CreatePreRegistrationParams): Promise<CreatePreRegistrationReturn> {
-
   const validated = personalDataFormSchema.safeParse(personalData);
 
   if (!validated.success) {

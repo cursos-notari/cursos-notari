@@ -2,7 +2,6 @@
 
 import { PublicClass } from "@/types/interfaces/database/class";
 import { Order } from "@/types/interfaces/payment/pagbank/order";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { createServiceClient } from "@/supabase/service-client";
 import { PreRegistration } from "@/types/interfaces/database/pre-registration";
 
@@ -19,7 +18,6 @@ export async function createPagBankOrder({
   preRegistrationData
 }: CreatePagBankOrderParams) {
 
-  // confere parâmetros
   if (!preRegistrationData) {
     return {
       success: false,
@@ -109,7 +107,7 @@ export async function createPagBankOrder({
 
     return {
       success: true,
-      message: "Ordem criada com sucesso.",
+      message: "Pedido criado com sucesso.",
       data: order
     }
 

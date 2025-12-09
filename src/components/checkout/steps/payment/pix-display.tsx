@@ -4,21 +4,22 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Copy, Check } from 'lucide-react';
-import { QrCode } from '@/types/interfaces/pagbank/order';
+import { Card, CardContent } from '@/components/ui/card';
+import { Copy, Check, AlertCircleIcon } from 'lucide-react';
+import { QrCode } from '@/types/interfaces/payment/pagbank/order';
+import { Spinner } from '@/components/ui/spinner';
 
 interface PixDisplayProps {
   qrCodeData: QrCode
 }
 
-// Função para calcular o tempo restante
-const calculateTimeLeft = (expirationDate: string): string => {
+// função para calcular o tempo restante
+const calculateTimeLeft = (expirationDate: string): string | boolean => {
   const expiration = new Date(expirationDate).getTime();
   const now = new Date().getTime();
   const distance = expiration - now;
 
-  if (distance < 0) return "Expirado";
+  if (distance < 0) return false;
 
   const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((distance % (1000 * 60)) / 1000);
@@ -27,20 +28,25 @@ const calculateTimeLeft = (expirationDate: string): string => {
 };
 
 const PixDisplay = React.memo(function PixDisplay({ qrCodeData }: PixDisplayProps) {
+
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => setIsClient(true), []);
+
   const [isCopied, setIsCopied] = useState(false);
 
-  // Calcula o tempo inicial IMEDIATAMENTE (antes do useEffect)
+  // calcula o tempo inicial
   const [timeLeft, setTimeLeft] = useState(() =>
     calculateTimeLeft(qrCodeData.expiration_date)
   );
 
-  // Memoização da URL da imagem do QR Code
+  // memoização da URL da imagem do QR Code
   const qrCodeImageUrl = useMemo(() =>
     qrCodeData.links.find(link => link.rel === 'QRCODE.PNG')?.href,
     [qrCodeData.links]
   );
 
-  // Função memoizada para copiar o código PIX
+  // função memoizada para copiar o código PIX
   const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(qrCodeData.text);
@@ -49,7 +55,7 @@ const PixDisplay = React.memo(function PixDisplay({ qrCodeData }: PixDisplayProp
     } catch (error) {
       console.error('Erro ao copiar código PIX:', error);
 
-      // Fallback para browsers mais antigos
+      // fallback para browsers mais antigos
       const textArea = document.createElement('textarea');
       textArea.value = qrCodeData.text;
       document.body.appendChild(textArea);
@@ -61,14 +67,14 @@ const PixDisplay = React.memo(function PixDisplay({ qrCodeData }: PixDisplayProp
     }
   }, [qrCodeData.text]);
 
-  // Efeito para atualizar o contador a cada segundo
+  // efeito para atualizar o contador a cada segundo
   useEffect(() => {
     const interval = setInterval(() => {
       const newTimeLeft = calculateTimeLeft(qrCodeData.expiration_date);
-      setTimeLeft(newTimeLeft);
+      setTimeLeft(newTimeLeft ?? 'Expirado');
 
-      // Para o intervalo se expirou
-      if (newTimeLeft === "Expirado") {
+      // para o intervalo se expirou
+      if (!newTimeLeft) {
         clearInterval(interval);
       }
     }, 1000);
@@ -76,52 +82,56 @@ const PixDisplay = React.memo(function PixDisplay({ qrCodeData }: PixDisplayProp
     return () => clearInterval(interval);
   }, [qrCodeData.expiration_date]);
 
-  if (!qrCodeImageUrl) {
-    return <p>Erro ao carregar o QR Code.</p>;
-  }
+  if (!qrCodeImageUrl) throw new Error("deu ruim");
 
   return (
-    <Card className="w-full gap-10 max-h-100 min-w-2xl mx-auto">
-      <CardHeader className="text-center">
-        <CardTitle className='text-gray-700'>Pague com PIX</CardTitle>
-        <CardDescription className='font-medium'>
-          Abra o app do seu banco e escaneie o código abaixo.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex items-center gap-6">
-        <div className="p-4 border rounded-lg bg-white w-2/3 flex justify-center">
-          <Image
-            src={qrCodeImageUrl}
-            alt="QR Code PIX"
-            width={200}
-            height={200}
-            priority
-          />
-        </div>
-        <div className='border-l border-gray-300 mx-6 h-55'></div>
-        <div className="w-full space-y-2 text-center">
-          <p className="text-sm font-medium">Ou use o PIX Copia e Cola:</p>
-          <div className="flex items-center gap-2">
-            <Input
-              readOnly
-              value={qrCodeData.text}
-              className="text-xs truncate"
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleCopy}
-              className="shrink-0 cursor-pointer"
-            >
-              {isCopied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-            </Button>
+    <Card className="gap-10 min-w-2xl max-w-2xl rounded-none border-none shadow-none py-0">
+      <CardContent className="flex flex-col items-center gap-6 px-0!">
+        {(isClient && timeLeft) ?
+          <div className="w-full flex items-center bg-accent py-1 min-h-10 rounded-sm border justify-center gap-2 text-center">
+            <AlertCircleIcon size={20} />
+            <p className="text-sm font-semibold text-gray-600">Este código expira em:</p>
+            <p className="text-lg text-gray-800 font-bold">{timeLeft}</p>
           </div>
-          {timeLeft && (
-            <div className="text-center mt-10">
-              <p className="text-sm text-gray-600">Este código expira em:</p>
-              <p className="text-lg font-bold text-red-600">{timeLeft}</p>
+          :
+          <div className="w-full flex items-center bg-accent py-1 min-h-10 rounded-sm border justify-center gap-2 text-center">
+            <Spinner />
+          </div>
+        }
+        <div className='w-full flex gap-6'>
+          <div className="flex justify-center">
+            <Image
+              src={qrCodeImageUrl}
+              alt="QR Code PIX"
+              width={200}
+              height={200}
+              priority
+            />
+          </div>
+          <div className="flex flex-col flex-1 justify-between py-5">
+            <h3 className='text-gray-800 font-medium'>
+              Escaneie o QR Code ou copie o código Pix para pagar.
+            </h3>
+            <p className='text-gray-700 text-sm'>
+              Após realizar o pagamento, você receberá um email com instruções e ingressos para as aulas.
+            </p>
+            {/* não pode renderizar no server side, porque até chegar no client side, vai dar mismatch */}
+            <div className="flex items-center gap-2">
+              <Input
+                readOnly
+                value={qrCodeData.text}
+                className="text-xs truncate"
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleCopy}
+                className="shrink-0 cursor-pointer"
+              >
+                {isCopied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+              </Button>
             </div>
-          )}
+          </div>
         </div>
       </CardContent>
     </Card>

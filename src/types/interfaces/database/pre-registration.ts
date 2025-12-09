@@ -1,3 +1,5 @@
+import { Order } from "../payment/pagbank/order";
+
 export interface PreRegistration {
   id: string;
   class_id: string;
@@ -19,7 +21,7 @@ export interface PreRegistration {
   status: 'pending' | 'confirmed' | 'cancelled' | string;
   
   pagbank_order_id: string | null;
-  pagbank_order_data: Record<string, any> | null; // jsonb é mapeado para um objeto genérico
+  pagbank_order_data: Order; // jsonb é mapeado para um objeto genérico
   order_created_at: string | null;
   
   created_at: string;

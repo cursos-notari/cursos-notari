@@ -1,18 +1,30 @@
-"use client"
-
-import React from 'react'
-
-interface ErrorProps {
+'use client'
+ 
+import { useEffect } from 'react'
+ 
+export default function Error({
+  error,
+  reset,
+}: {
   error: Error & { digest?: string }
   reset: () => void
-}
-
-export default function Error({ error, reset }: ErrorProps) {
-  // TODO: ESTILIZAR ESSA PÁGINA DE ERRO
+}) {
+  useEffect(() => {
+    // Log the error to an error reporting service
+    console.error(error)
+  }, [error])
+ 
   return (
     <div>
-      <p>Erro: {error.message}</p>
-      <button onClick={reset}>Tentar novamente</button>
+      <h2>Algo deu errado!</h2>
+      <button
+        onClick={
+          // Attempt to recover by trying to re-render the segment
+          () => reset()
+        }
+      >
+        Try again
+      </button>
     </div>
   )
 }

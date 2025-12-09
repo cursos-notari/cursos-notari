@@ -5,7 +5,7 @@ import Image from 'next/image'
 
 export default function TargetAudience() {
   return (
-    <section className={clsx('altBg', styles.public)}>
+    <section className={styles.public}>
       <div className={styles.containerIntro}>
         <h1 className={clsx('emphasis text-sky-600 delayMediumReveal', styles.title)}>
           Para quem é esse curso

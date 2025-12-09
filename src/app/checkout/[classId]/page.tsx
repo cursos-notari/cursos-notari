@@ -42,8 +42,6 @@ async function CheckoutContent({ params }: { params: Promise<{ classId: string }
 
   if (!res.data) notFound();
 
-  const classData = res.data;
-
   return (
     <CheckoutProvider classData={res.data}>
       <div className="flex flex-col-reverse gap-10 md:flex-row w-full justify-between">

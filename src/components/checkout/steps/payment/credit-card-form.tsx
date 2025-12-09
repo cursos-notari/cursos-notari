@@ -1,28 +1,29 @@
 "use client";
 
-import React, { useState, useMemo } from 'react'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { paymentCardSchema, TPaymentCardSchema } from '@/validation/zod-schemas/payment-card-schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Lock } from 'lucide-react';
-import { detectCardBrand } from '@/utils/detect-card-brand';
-import { formatCardNumber } from '@/utils/format-card-number';
-import { Spinner } from '@/components/ui/spinner';
 import { clearSensitiveData, encryptCardData, getPublicKey, prepareCardData, validatePagSeguroSDK } from '@/utils/encryptionHelper';
-import { creditCardCharge } from '@/actions/server/payment/credit-card-charge';
-import { toast } from 'sonner';
-import { Checkbox } from '@/components/ui/checkbox';
-
-import 'react-credit-cards-2/dist/es/styles-compiled.css'
-import dynamic from 'next/dynamic';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { paymentCardSchema, TPaymentCardSchema } from '@/validation/zod-schemas/payment-card-schema';
 import { createPreRegistration } from '@/actions/server/pre-registration/create-pre-registration';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { creditCardCharge } from '@/actions/server/payment/credit-card-charge';
 import usePersonalData from '@/hooks/zustand/use-personal-data';
 import { useCheckoutData } from '@/contexts/class-data-context';
+import { formatCardNumber } from '@/utils/format-card-number';
+import { detectCardBrand } from '@/utils/detect-card-brand';
+import 'react-credit-cards-2/dist/es/styles-compiled.css'
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Spinner } from '@/components/ui/spinner';
+import React, { useState, useMemo } from 'react'
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+import { Lock } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { toast } from 'sonner';
+import { usePathname, useRouter } from 'next/navigation';
+
 
 const Cards = dynamic(() => import('react-credit-cards-2'), {
   ssr: false, // renderiza direto no cliente
@@ -30,8 +31,6 @@ const Cards = dynamic(() => import('react-credit-cards-2'), {
 });
 
 const CreditCardForm = React.memo(function CreditCardForm() {
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [focused, setFocused] = useState<'number' | 'expiry' | 'cvc' | 'name' | undefined>();
 
@@ -53,21 +52,27 @@ const CreditCardForm = React.memo(function CreditCardForm() {
     Array.from({ length: 12 }, (_, i) => i + 1), []
   );
 
+  // Watch card number once and use it consistently
+  const watchedCardNumber = form.watch('cardNumber');
+
   // Valores computados
   // const orderValue = useMemo(() => unitAmount / 100, [unitAmount]);
 
   const cardBrand = useMemo(() =>
-    detectCardBrand(form.watch('cardNumber') || ''),
-    [form.watch('cardNumber')]
+    detectCardBrand(watchedCardNumber || ''),
+    [watchedCardNumber]
   );
+  
+  const router = useRouter();
 
+  const pathname = usePathname();
+  
   const personalData = usePersonalData(state => state.personalData)!;
 
-  const { classData } = useCheckoutData()
+  const { classData } = useCheckoutData();
 
   const handleCreditCardFormSubmit = async (creditCardData: TPaymentCardSchema,) => {
     try {
-      setIsSubmitting(true);
       validatePagSeguroSDK();
       const publicKey = getPublicKey();
       const cardData = prepareCardData(creditCardData);
@@ -80,24 +85,25 @@ const CreditCardForm = React.memo(function CreditCardForm() {
       // limpa dados sensíveis vindos do formulário
       clearSensitiveData(creditCardData);
 
-      const preRegistration = await createPreRegistration({ personalData, classId: classData.id  });
+      const preRegistration = await createPreRegistration({ personalData, classId: classData.id });
 
-      if (!preRegistration.success || !preRegistration.id) throw new Error("Não foi possível criar o registro");
+      if (!preRegistration.success || !preRegistration.id) {
+        throw new Error("Não foi possível criar o registro");
+      }
 
       const res = await creditCardCharge(preRegistration.id, {
         installments: creditCardData.installments,
         cardToken: encryptedCardToken
       });
 
-      if (!res.success) throw new Error(res.message);
+      if (!res.success) throw new Error("Ocorreu um erro ao processar o pagamento");
 
-    } catch (e) {
-      console.error('Erro no processamento do pagamento:', e);
-      toast.error('Não foi possível processar o pagamento. Tente novamente.', {
+      router.push(`${pathname}/congrats`);
+
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao processar pagamento. Tente novamente mais tarde', {
         position: 'top-center'
       });
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -256,7 +262,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                 <div className='flex flex-col justify-between pb-8 max-w-[290px] w-1/2 space-y-5'>
                   <div className="relative min-h-[180px]">
                     <Cards
-                      number={form.watch('cardNumber')}
+                      number={watchedCardNumber}
                       expiry={form.watch('expiryDate')}
                       cvc={form.watch('cvv')}
                       name={form.watch('holderName')}
@@ -327,9 +333,9 @@ const CreditCardForm = React.memo(function CreditCardForm() {
               <Button
                 type="submit"
                 className="w-full bg-green-600 hover:bg-green-700 cursor-pointer"
-                disabled={isSubmitting}
+                disabled={form.formState.isSubmitting}
               >
-                {isSubmitting ? <><Spinner />Processando</> : 'Finalizar pedido'}
+                {form.formState.isSubmitting ? <><Spinner />Processando</> : 'Finalizar pedido'}
               </Button>
             </div>
           </form>
