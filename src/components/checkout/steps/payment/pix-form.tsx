@@ -6,7 +6,7 @@ import { pixFormSchema, PixFormSchema } from '@/validation/zod-schemas/pix-form-
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
 import { processPixPayment } from '@/actions/server/payment/process-pix-payment'
 import usePersonalData from '@/hooks/zustand/use-personal-data'
-import { useCheckoutData } from '@/contexts/class-data-context'
+import { useClassData } from '@/hooks/use-class-data'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Spinner } from '@/components/ui/spinner'
@@ -30,7 +30,7 @@ export default function PixForm() {
 
   const pathname = usePathname();
 
-  const { classData } = useCheckoutData();
+  const { classData } = useClassData();
 
   const personalData = usePersonalData.getState().personalData;
 

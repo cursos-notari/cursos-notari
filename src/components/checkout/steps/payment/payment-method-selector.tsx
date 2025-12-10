@@ -8,19 +8,19 @@ import { IconFileBarcode } from '@tabler/icons-react';
 import { PayMethod } from '@/types/enum/payment-method';
 
 interface PaymentMethodSelectorProps {
-  customerName?:  string;
   selectedPaymentMethod: PayMethod;
   onPaymentSelect: (method: PayMethod) => void;
 }
 
 const PaymentMethodSelector = memo(function PaymentMethodSelector({
-  customerName,
   selectedPaymentMethod,
   onPaymentSelect
 }: PaymentMethodSelectorProps) {
   return (
     <div className="flex flex-col items-center space-y-4 mb-6 max-h-20">
-      <h3 className='text-lg text-center text-gray-600 font-semibold'>{customerName ? `Quase lá ${customerName}, s` : 'S'}elecione a forma de pagamento</h3>
+      <h3 className='text-lg text-center text-gray-600 font-semibold'>
+        Selecione a forma de pagamento
+      </h3>
       <div className='flex space-x-4'>
         <Button
           className='cursor-pointer'

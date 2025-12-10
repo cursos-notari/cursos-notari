@@ -1,12 +1,15 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useCheckoutData } from '@/contexts/class-data-context';
+import { useClassData } from '@/hooks/use-class-data';
+import useCheckout from '@/hooks/zustand/use-checkout';
+
 import { Info } from 'lucide-react';
 
 export default function OrderReview() {
 
-  const { classData } = useCheckoutData();
+  const { classData } = useClassData();
+  const { installments, installmentsPrice } = useCheckout();
 
   return (
     <aside className='md:sticky top-10 flex flex-col w-full self-start md:max-w-md h-fit'>
@@ -22,11 +25,24 @@ export default function OrderReview() {
               <div className='flex flex-col'>
                 <p className='font-semibold'>Curso {classData.name}</p>
                 <span className='text-xs font-medium text-gray-600'>1 Vaga</span>
-                <span></span>
               </div>
-              <span className='whitespace-nowrap font-semibold text-green-600'>
-                R$ {classData.registration_fee}
-              </span>
+              <div className='flex flex-col items-end'>
+
+                {installments && installmentsPrice && (
+                  <div className='flex gap-1 items-center'>
+                    <span className='text-gray-600 text-xs font-medium'>{installments > 1 && installments + 'x'}</span>
+                    <span className='text-base whitespace-nowrap font-medium text-green-600'>
+                      {installmentsPrice.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                      })}
+                    </span>
+                  </div>
+                )}
+                {installments === 1 && (
+                  <span className='text-xs text-gray-600'>à vista</span>
+                )}
+              </div>
             </div>
 
             <div className='flex flex-col justify-between space-y-2'>

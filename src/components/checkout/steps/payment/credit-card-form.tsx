@@ -8,11 +8,13 @@ import { createPreRegistration } from '@/actions/server/pre-registration/create-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { creditCardCharge } from '@/actions/server/payment/credit-card-charge';
 import usePersonalData from '@/hooks/zustand/use-personal-data';
-import { useCheckoutData } from '@/contexts/class-data-context';
 import { formatCardNumber } from '@/utils/format-card-number';
 import { detectCardBrand } from '@/utils/detect-card-brand';
 import 'react-credit-cards-2/dist/es/styles-compiled.css'
+import { usePathname, useRouter } from 'next/navigation';
+import useCheckout from '@/hooks/zustand/use-checkout';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useClassData } from '@/hooks/use-class-data';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Spinner } from '@/components/ui/spinner';
 import React, { useState, useMemo } from 'react'
@@ -20,9 +22,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import { Lock } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
-import { usePathname, useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 
 
 const Cards = dynamic(() => import('react-credit-cards-2'), {
@@ -69,7 +70,9 @@ const CreditCardForm = React.memo(function CreditCardForm() {
   
   const personalData = usePersonalData(state => state.personalData)!;
 
-  const { classData } = useCheckoutData();
+  const { classData } = useClassData();
+  
+  const { setInstallments } = useCheckout();
 
   const handleCreditCardFormSubmit = async (creditCardData: TPaymentCardSchema,) => {
     try {
@@ -235,7 +238,11 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                         <FormLabel className='text-gray-700'>Parcelas</FormLabel>
                         <FormControl>
                           <Select
-                            onValueChange={(value) => field.onChange(parseInt(value))}
+                            onValueChange={(value) => {
+                              const installments = parseInt(value);
+                              field.onChange(installments);
+                              setInstallments(installments, classData.registration_fee);
+                            }}
                             value={field.value?.toString() || '1'}
                           >
                             <SelectTrigger className="w-full">
