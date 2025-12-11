@@ -3,11 +3,7 @@
 import { createContext, useContext } from 'react'
 import { PublicClass } from '@/types/interfaces/database/class'
 
-interface ClassContext {
-  classData: PublicClass
-}
-
-export const ClassContext = createContext<ClassContext | null>(null)
+export const ClassContext = createContext<{ classData: PublicClass } | null>(null);
 
 export function CheckoutProvider({ 
   children, 

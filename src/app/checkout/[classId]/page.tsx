@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { getClassById } from "@/actions/server/class/get-class-by-id";
 import OrderReview from "@/components/checkout/steps/payment/order-review";
-import { createServiceClient } from "@/supabase/service-client";
 import CheckoutSteps from "./checkout-steps";
 import Image from "next/image";
 import { notFound } from "next/navigation";

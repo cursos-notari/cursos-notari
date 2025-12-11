@@ -2,14 +2,33 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useClassData } from '@/hooks/use-class-data';
-import useCheckout from '@/hooks/zustand/use-checkout';
+import { useCheckout } from '@/hooks/zustand/use-checkout';
+import { useEffect } from 'react';
 
 import { Info } from 'lucide-react';
 
 export default function OrderReview() {
 
   const { classData } = useClassData();
-  const { installments, installmentsPrice } = useCheckout();
+  const { registration_fee } = classData;
+  const { installments, installmentsPrice, setInstallments } = useCheckout();
+
+  // inicializar o checkout com os dados da classe
+  useEffect(() => {
+    if (registration_fee && installmentsPrice === null) {
+      setInstallments(12, registration_fee);
+    }
+  }, [registration_fee, installmentsPrice, setInstallments]);
+
+   useEffect(() => {
+    if (registration_fee && installmentsPrice !== null) {
+      // Recalcula se houver inconsistência
+      const expectedPrice = registration_fee / installments;
+      if (Math.abs(installmentsPrice - expectedPrice) > 0.01) {
+        setInstallments(installments, registration_fee);
+      }
+    }
+  }, [installments, registration_fee, installmentsPrice, setInstallments]);
 
   return (
     <aside className='md:sticky top-10 flex flex-col w-full self-start md:max-w-md h-fit'>
@@ -28,9 +47,9 @@ export default function OrderReview() {
               </div>
               <div className='flex flex-col items-end'>
 
-                {installments && installmentsPrice && (
-                  <div className='flex gap-1 items-center'>
-                    <span className='text-gray-600 text-xs font-medium'>{installments > 1 && installments + 'x'}</span>
+                {installmentsPrice !== null ? (
+                  <div className=''>
+                    <span className='text-gray-600 text-xs font-medium'>{installments > 1 && installments + 'x '}</span>
                     <span className='text-base whitespace-nowrap font-medium text-green-600'>
                       {installmentsPrice.toLocaleString('pt-BR', {
                         style: 'currency',
@@ -38,7 +57,7 @@ export default function OrderReview() {
                       })}
                     </span>
                   </div>
-                )}
+                ) :  <div className="h-6 w-20 bg-gray-200 rounded animate-pulse"></div>}
                 {installments === 1 && (
                   <span className='text-xs text-gray-600'>à vista</span>
                 )}

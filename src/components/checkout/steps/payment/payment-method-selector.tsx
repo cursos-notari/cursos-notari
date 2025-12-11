@@ -8,12 +8,12 @@ import { IconFileBarcode } from '@tabler/icons-react';
 import { PayMethod } from '@/types/enum/payment-method';
 
 interface PaymentMethodSelectorProps {
-  selectedPaymentMethod: PayMethod;
+  paymentMethod: PayMethod;
   onPaymentSelect: (method: PayMethod) => void;
 }
 
 const PaymentMethodSelector = memo(function PaymentMethodSelector({
-  selectedPaymentMethod,
+  paymentMethod,
   onPaymentSelect
 }: PaymentMethodSelectorProps) {
   return (
@@ -24,7 +24,7 @@ const PaymentMethodSelector = memo(function PaymentMethodSelector({
       <div className='flex space-x-4'>
         <Button
           className='cursor-pointer'
-          variant={selectedPaymentMethod === PayMethod.CREDIT_CARD ? 'personalized' : 'outlinePersonalized'}
+          variant={paymentMethod === PayMethod.CREDIT_CARD ? 'personalized' : 'outlinePersonalized'}
           onClick={() => onPaymentSelect(PayMethod.CREDIT_CARD)}
           aria-label="Selecionar pagamento com cartão de crédito"
         >
@@ -32,15 +32,15 @@ const PaymentMethodSelector = memo(function PaymentMethodSelector({
         </Button>
         <Button
           className='cursor-pointer'
-          variant={selectedPaymentMethod === PayMethod.PIX ? 'personalized' : 'outlinePersonalized'}
+          variant={paymentMethod === PayMethod.PIX ? 'personalized' : 'outlinePersonalized'}
           onClick={() => onPaymentSelect(PayMethod.PIX)}
           aria-label="Selecionar pagamento com PIX"
         >
-          PIX<PixIcon fill={selectedPaymentMethod === PayMethod.PIX ? 'oklch(98.4% 0.003 247.858)' : 'oklch(55.1% 0.027 264.364)'} />
+          PIX<PixIcon fill={paymentMethod === PayMethod.PIX ? 'oklch(98.4% 0.003 247.858)' : 'oklch(55.1% 0.027 264.364)'} />
         </Button>
         <Button
           className='cursor-pointer'
-          variant={selectedPaymentMethod === PayMethod.BOLETO ? 'personalized' : 'outlinePersonalized'}
+          variant={paymentMethod === PayMethod.BOLETO ? 'personalized' : 'outlinePersonalized'}
           onClick={() => onPaymentSelect(PayMethod.BOLETO)}
           aria-label="Selecionar pagamento com boleto"
         >

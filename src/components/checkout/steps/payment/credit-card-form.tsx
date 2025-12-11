@@ -12,7 +12,7 @@ import { formatCardNumber } from '@/utils/format-card-number';
 import { detectCardBrand } from '@/utils/detect-card-brand';
 import 'react-credit-cards-2/dist/es/styles-compiled.css'
 import { usePathname, useRouter } from 'next/navigation';
-import useCheckout from '@/hooks/zustand/use-checkout';
+import { useCheckout } from '@/hooks/zustand/use-checkout';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useClassData } from '@/hooks/use-class-data';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -24,7 +24,7 @@ import { useForm } from 'react-hook-form';
 import { Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
-
+import { useEffect } from 'react';
 
 const Cards = dynamic(() => import('react-credit-cards-2'), {
   ssr: false, // renderiza direto no cliente
@@ -35,6 +35,8 @@ const CreditCardForm = React.memo(function CreditCardForm() {
 
   const [focused, setFocused] = useState<'number' | 'expiry' | 'cvc' | 'name' | undefined>();
 
+  const { setInstallments, installments: currentInstallments } = useCheckout();
+
   const form = useForm<TPaymentCardSchema>({
     resolver: zodResolver(paymentCardSchema),
     defaultValues: {
@@ -42,7 +44,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
       cardNumber: '',
       cvv: '',
       expiryDate: '',
-      installments: 1,
+      installments: currentInstallments,
       acceptPolicy: false,
       acceptContract: false
     }
@@ -63,16 +65,14 @@ const CreditCardForm = React.memo(function CreditCardForm() {
     detectCardBrand(watchedCardNumber || ''),
     [watchedCardNumber]
   );
-  
+
   const router = useRouter();
 
   const pathname = usePathname();
-  
+
   const personalData = usePersonalData(state => state.personalData)!;
 
   const { classData } = useClassData();
-  
-  const { setInstallments } = useCheckout();
 
   const handleCreditCardFormSubmit = async (creditCardData: TPaymentCardSchema,) => {
     try {
@@ -352,4 +352,4 @@ const CreditCardForm = React.memo(function CreditCardForm() {
   );
 });
 
-export default CreditCardForm
+export default CreditCardForm;
