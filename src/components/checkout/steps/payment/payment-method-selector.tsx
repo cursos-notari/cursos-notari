@@ -2,10 +2,18 @@
 
 import React, { memo } from 'react';
 import { Button } from '@/components/ui/button';
-import PixIcon from '@/components/icons/pix-icon';
+
 import { CreditCard } from 'lucide-react';
 import { IconFileBarcode } from '@tabler/icons-react';
 import { PayMethod } from '@/types/enum/payment-method';
+
+import dynamic from 'next/dynamic';
+import { Spinner } from '@/components/ui/spinner';
+
+const PixIcon = dynamic(() => import('@/components/icons/pix-icon'), {
+  ssr: false, // renderiza direto no cliente
+  loading: () => <Spinner />
+});
 
 interface PaymentMethodSelectorProps {
   paymentMethod: PayMethod;

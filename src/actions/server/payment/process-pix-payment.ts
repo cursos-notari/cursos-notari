@@ -45,15 +45,6 @@ export async function processPixPayment({ preRegistrationId, classData }: Proces
       });
     }
 
-    // salva o ID em um cookie
-    const cookieStore = await cookies();
-    cookieStore.set('pre_registration_id', preRegistrationId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 // 1 hora de duração
-    });
-
   } catch (error: any) {
     console.error(error.message);
     return {

@@ -20,7 +20,7 @@ export default function OrderReview() {
     }
   }, [registration_fee, installmentsPrice, setInstallments]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (registration_fee && installmentsPrice !== null) {
       // Recalcula se houver inconsistência
       const expectedPrice = registration_fee / installments;
@@ -38,7 +38,7 @@ export default function OrderReview() {
           <CardDescription className='font-medium'>Confira pelo que você está pagando</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className='flex flex-col text-sm border rounded-sm space-y-6 py-4 px-4'>
+          <div className='flex flex-col text-sm border space-y-6 py-4 px-4'>
 
             <div className='flex justify-between'>
               <div className='flex flex-col'>
@@ -57,10 +57,10 @@ export default function OrderReview() {
                       })}
                     </span>
                   </div>
-                ) :  <div className="h-6 w-20 bg-gray-200 rounded animate-pulse"></div>}
-                {installments === 1 && (
-                  <span className='text-xs text-gray-600'>à vista</span>
-                )}
+                ) : <div className="h-6 w-20 bg-gray-200 rounded animate-pulse"></div>}
+                <span className='text-xs text-gray-600 h-4'>
+                  {installments === 1 ? 'à vista' : '\u00A0'}
+                </span>
               </div>
             </div>
 
@@ -81,7 +81,7 @@ export default function OrderReview() {
               </ul>
             </div>
 
-            <div className='flex bg-muted p-3 space-x-2 text-center rounded-sm'>
+            <div className='flex bg-muted p-3 space-x-2 text-center'>
               <Info size={15} className='text-gray-700 mt-0.5' />
               <p className='text-gray-700 font-medium'>
                 Após realizar o pagamento, você receberá um <br /> e-mail com os ingressos para as aulas.

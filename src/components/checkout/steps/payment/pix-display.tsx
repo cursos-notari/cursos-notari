@@ -113,7 +113,7 @@ const PixDisplay = React.memo(function PixDisplay({ qrCodeData }: PixDisplayProp
               Escaneie o QR Code ou copie o código Pix para pagar.
             </h3>
             <p className='text-gray-700 text-sm'>
-              Após realizar o pagamento, você receberá um email com instruções e ingressos para as aulas.
+              Após a confirmação do pagamento, você receberá um email com instruções e ingressos para as aulas.
             </p>
             {/* não pode renderizar no server side, porque até chegar no client side, vai dar mismatch */}
             <div className="flex items-center gap-2">

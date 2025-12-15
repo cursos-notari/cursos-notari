@@ -6,7 +6,7 @@ import { confirmPayment } from "../pre-registration/confirm-payment";
 
 export interface CreditCardChargeResult {
   success: boolean;
-  message: string;
+  message?: string;
   orderId?: string;
 }
 
@@ -23,24 +23,18 @@ export async function creditCardCharge(
   try {
     const supabase = createServiceClient();
 
-    if (!supabase) throw new Error('Supabase client not found');
+    if (!supabase) return { success: false }
 
-    const preRegistration = await getPreRegistrationById(preRegistrationId, supabase);
+    const preRegistration = await getPreRegistrationById(preRegistrationId);
 
     if (!preRegistration.success || !preRegistration.data) {
-      return {
-        success: false,
-        message: "Registro não encontrado."
-      };
+      return { success: false };
     }
 
     const { pagbank_order_id, pagbank_order_data } = preRegistration.data;
     
     if (!pagbank_order_id || !pagbank_order_data) {
-      return {
-        success: false,
-        message: "Pedido não encontrado."
-      };
+      return { success: false };
     }
 
     const orderId = pagbank_order_id;
@@ -79,13 +73,13 @@ export async function creditCardCharge(
       console.error("Erro ao processar pagamento:", responseData);
       return {
         success: false,
-        message: responseData.error_messages?.[0]?.description || "A operadora recusou o pagamento.",
+        message: responseData.error_messages?.[0]?.description ?? null,
       };
     }
 
     const charge = responseData.charges?.[0];
     
-    // Verificar status do pagamento
+    // verificar status do pagamento
     if (charge?.status !== 'PAID') {
       return {
         success: false,
@@ -114,15 +108,11 @@ export async function creditCardCharge(
 
     return {
       success: true,
-      message: "Pagamento aprovado com sucesso!",
       orderId: orderId,
     };
 
   } catch (error) {
     console.error("Erro ao processar pagamento:", error);
-    return {
-      success: false,
-      message: "Ocorreu um erro inesperado ao processar seu pagamento. Tente novamente.",
-    };
+    return { success: false };
   }
 }

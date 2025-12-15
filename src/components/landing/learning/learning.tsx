@@ -5,7 +5,7 @@ import Modules from './modules'
 export default function Learning() {
   return (
     <section className={styles.learning}>
-      <h1 className={clsx('emphasis text-sky-600 delayMediumReveal', styles.title)}>
+      <h1 className={clsx('emphasis text-sky-600 delay-medium-reveal', styles.title)}>
         O que você vai aprender
       </h1>
       <Modules />

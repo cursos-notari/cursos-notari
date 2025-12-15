@@ -1,7 +1,6 @@
 "use client"
 
 import { useForm } from 'react-hook-form'
-import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { personalDataFormSchema, PersonalDataFormSchema } from '@/validation/zod-schemas/personal-data-form-schema'
 import { Button } from '@/components/ui/button'
@@ -14,8 +13,6 @@ import { formatCPF } from '@/utils/format-CPF'
 import { formatPhone } from '@/utils/format-phone'
 import { formatCEP } from '@/utils/format-CEP'
 import { Loader2Icon } from 'lucide-react'
-import { createPreRegistration } from '@/actions/server/pre-registration/create-pre-registration'
-import { toast } from 'sonner'
 import { defaultValuesMock } from '@/mocks/personal-data-mock'
 import { useQuery } from '@tanstack/react-query'
 import { getAddressByCEP } from '@/services/get-address-by-cep'
@@ -112,10 +109,10 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            {/* Fieldset para Informações Pessoais */}
-            <fieldset className="border border-gray-200 rounded-lg p-6 space-y-4">
+            {/* fieldset para informações pessoais */}
+            <fieldset className="border border-gray-200 p-6 rounded-md space-y-4">
               <legend className="text-lg font-semibold emphasis px-3">Informações Pessoais</legend>
-              {/* Nome e Sobrenome */}
+              {/* nome e sobrenome */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -154,7 +151,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-15 items-start">
 
-                {/* Data de Nascimento */}
+                {/* data de nascimento */}
                 <FormField
                   control={form.control}
                   name="birthdate"
@@ -211,7 +208,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start row-reverse">
 
-                {/* Telefone */}
+                {/* telefone */}
                 <FormField
                   control={form.control}
                   name="phone"
@@ -234,7 +231,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                   )}
                 />
 
-                {/* Email */}
+                {/* email */}
                 <FormField
                   control={form.control}
                   name="email"
@@ -258,11 +255,11 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
               </div>
             </fieldset>
 
-            {/* Fieldset para Endereço */}
-            <fieldset className="border border-gray-200 rounded-lg p-6 space-y-4">
+            {/* fieldset para endereço */}
+            <fieldset className="border border-gray-200 p-6 rounded-md space-y-4">
               <legend className="text-lg font-semibold emphasis px-3">Endereço</legend>
 
-              {/* CEP e Rua */}
+              {/* CEP e rua */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
@@ -306,7 +303,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                 />
               </div>
 
-              {/* Número e Complemento */}
+              {/* número e complemento */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                 <div className="flex flex-col gap-2">
                   <FormField
@@ -374,7 +371,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                 />
               </div>
 
-              {/* Bairro, Cidade e Estado */}
+              {/* bairro, cidade e estado */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
@@ -410,7 +407,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                           readOnly
                           {...field}
                           value="SP" // Sempre SP
-                          onChange={() => {}} // Previne qualquer mudança
+                          onChange={() => {}} // previne qualquer mudança
                         />
                       </FormControl>
                       <FormMessage />
@@ -448,7 +445,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
               </div>
             </fieldset>
 
-            {/* Campo oculto para state */}
+            {/* campo oculto para state */}
             <FormField
               control={form.control}
               name="state"
@@ -459,14 +456,13 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                       type="hidden" 
                       {...field} 
                       value="São Paulo" 
-                      onChange={() => {}} // Previne qualquer mudança
+                      onChange={() => {}} // previne qualquer mudança
                     />
                   </FormControl>
                 </FormItem>
               )}
             />
 
-            {/* Botão de Submit */}
             <Button
               type="submit"
               variant='personalized'

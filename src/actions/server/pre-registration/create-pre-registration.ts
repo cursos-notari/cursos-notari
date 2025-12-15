@@ -2,6 +2,7 @@
 
 import { createServiceClient } from "@/supabase/service-client";
 import { PersonalDataFormSchema, personalDataFormSchema } from "@/validation/zod-schemas/personal-data-form-schema";
+import { cookies } from "next/headers";
 
 export interface CreatePreRegistrationParams {
   personalData: PersonalDataFormSchema
@@ -16,9 +17,16 @@ interface CreatePreRegistrationReturn {
 }
 
 export async function createPreRegistration({ classId, personalData }: CreatePreRegistrationParams): Promise<CreatePreRegistrationReturn> {
-  const validated = personalDataFormSchema.safeParse(personalData);
 
-  if (!validated.success) {
+  if (!personalData) {
+    console.error('Dados do usuário não recebidos');
+    return { success: false }
+  }
+
+  const isValidData = personalDataFormSchema.safeParse(personalData);
+
+  if (!isValidData.success) {
+    console.log('erro de validação: ', isValidData.error);
     return {
       success: false,
       message: 'Dados inválidos',
@@ -56,7 +64,21 @@ export async function createPreRegistration({ classId, personalData }: CreatePre
     }
   }
 
-  if (!result.success) console.error(`${result.code} : ${result.message}`);
+  if (!result.success) {
+    console.error(`${result.code} : ${result.message}`);
+    return {
+      success: false
+    }
+  }
+
+  // salva o ID em um cookie
+  const cookieStore = await cookies();
+  cookieStore.set('pre_registration_id', result.id, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 // 1 hora de duração
+  });
 
   return result;
 }

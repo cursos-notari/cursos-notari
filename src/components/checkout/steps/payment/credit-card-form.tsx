@@ -24,42 +24,40 @@ import { useForm } from 'react-hook-form';
 import { Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
-import { useEffect } from 'react';
+import SuccessAnimation from '@/components/animations/success-animation';
 
 const Cards = dynamic(() => import('react-credit-cards-2'), {
   ssr: false, // renderiza direto no cliente
-  loading: () => <div className="flex items-center justify-center h-[180px]"><Spinner /></div>
+  loading: () => <div className="flex items-center justify-center min-w-[290px] min-h-[182.26px]"><Spinner /></div>
 });
 
 const CreditCardForm = React.memo(function CreditCardForm() {
 
   const [focused, setFocused] = useState<'number' | 'expiry' | 'cvc' | 'name' | undefined>();
+  const [paymentAccepted, setPaymentAccepted] = useState(false);
 
   const { setInstallments, installments: currentInstallments } = useCheckout();
 
   const form = useForm<TPaymentCardSchema>({
     resolver: zodResolver(paymentCardSchema),
     defaultValues: {
-      holderName: '',
-      cardNumber: '',
-      cvv: '',
-      expiryDate: '',
+      holderName: 'PEDRO LUCAS ALMEIDA CUNHA',
+      cardNumber: '4539620659922097',
+      cvv: '123',
+      expiryDate: '12/30',
       installments: currentInstallments,
-      acceptPolicy: false,
-      acceptContract: false
+      acceptPolicy: true,
+      acceptContract: true
     }
   });
 
-  // Memoização de cálculos caros
+  // memoização de cálculos caros
   const installmentOptions = useMemo(() =>
     Array.from({ length: 12 }, (_, i) => i + 1), []
   );
 
-  // Watch card number once and use it consistently
+  // watch card number once and use it consistently
   const watchedCardNumber = form.watch('cardNumber');
-
-  // Valores computados
-  // const orderValue = useMemo(() => unitAmount / 100, [unitAmount]);
 
   const cardBrand = useMemo(() =>
     detectCardBrand(watchedCardNumber || ''),
@@ -70,7 +68,9 @@ const CreditCardForm = React.memo(function CreditCardForm() {
 
   const pathname = usePathname();
 
-  const personalData = usePersonalData(state => state.personalData)!;
+  const personalData = usePersonalData().personalData;
+
+  if (!personalData) throw new Error("Dados pessoais não recebidos");
 
   const { classData } = useClassData();
 
@@ -91,7 +91,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
       const preRegistration = await createPreRegistration({ personalData, classId: classData.id });
 
       if (!preRegistration.success || !preRegistration.id) {
-        throw new Error("Não foi possível criar o registro");
+        throw new Error("Ocorreu um erro. \n Contate o suporte ou tente novamente mais tarde.");
       }
 
       const res = await creditCardCharge(preRegistration.id, {
@@ -101,7 +101,10 @@ const CreditCardForm = React.memo(function CreditCardForm() {
 
       if (!res.success) throw new Error("Ocorreu um erro ao processar o pagamento");
 
-      router.push(`${pathname}/congrats`);
+      setPaymentAccepted(true);
+
+      // TODO: TROCAR POR .replace
+      setTimeout(() => router.push(`${pathname}/success`), 1500);
 
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao processar pagamento. Tente novamente mais tarde', {
@@ -267,15 +270,21 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                 <div className='border-l border-gray-300 mx-6 h-75'></div>
 
                 <div className='flex flex-col justify-between pb-8 max-w-[290px] w-1/2 space-y-5'>
-                  <div className="relative min-h-[180px]">
-                    <Cards
-                      number={watchedCardNumber}
-                      expiry={form.watch('expiryDate')}
-                      cvc={form.watch('cvv')}
-                      name={form.watch('holderName')}
-                      focused={focused}
-                      locale={{ valid: 'VALIDADE' }}
-                    />
+                  <div className="relative min-h-[180px] max-h-[180px]">
+                    {paymentAccepted
+                      ?
+                      <SuccessAnimation />
+                      :
+                      <Cards
+                        number={watchedCardNumber}
+                        expiry={form.watch('expiryDate')}
+                        cvc={form.watch('cvv')}
+                        name={form.watch('holderName')}
+                        focused={focused}
+                        locale={{ valid: 'VALIDADE' }}
+                        placeholders={{ name: 'SEU NOME AQUI' }}
+                      />
+                    }
                   </div>
 
                   {/* informações de segurança */}

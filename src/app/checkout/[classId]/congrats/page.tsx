@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { Suspense } from 'react'
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
+import PixIcon from '@/components/icons/pix-icon';
 
 const FallBack = () => (
   <div className='w-screen h-screen flex items-center justify-center'>
@@ -54,9 +55,11 @@ async function CongratsContent() {
           height={200}
           priority
         />
-        <div className='flex flex-col gap-2'>
-          <h1 className='text-3xl font-medium text-gray-800' >Parabéns, {name}!</h1>
-          <h3 className='text-gray-600 text-xl font-medium'>Seu pagamento está sendo processado</h3>
+        <div className='flex flex-col gap-3'>
+          <h1 className='text-xl font-medium text-gray-800' >Parabéns, {name}!</h1>
+          <h3 className='text-gray-800 text-3xl font-medium'>
+            Seu pagamento está sendo processado.
+          </h3>
         </div>
         <PixDisplay qrCodeData={qrCode} />
       </div>

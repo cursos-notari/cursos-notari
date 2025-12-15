@@ -7,13 +7,13 @@ export default function TargetAudience() {
   return (
     <section className={styles.public}>
       <div className={styles.containerIntro}>
-        <h1 className={clsx('emphasis text-sky-600 delayMediumReveal', styles.title)}>
+        <h1 className={clsx('emphasis text-sky-600 delay-medium-reveal', styles.title)}>
           Para quem é esse curso
         </h1>
-        <h3 className={clsx('delaySmallReveal', styles.subtitle)}>Esse curso é para quem...</h3>
+        <h3 className={clsx('delay-small-reveal', styles.subtitle)}>Esse curso é para quem...</h3>
       </div>
       <div className={styles.grade}>
-        <div className={clsx('intervalCardReveal', styles.item, "diagonalLinearBg")}>
+        <div className={clsx('interval-card-reveal', styles.item, "diagonalLinearBg")}>
           <div className={styles.containerText}>
             <p>
               Quer começar na área de refrigeração, mesmo sem experiência.
@@ -23,7 +23,7 @@ export default function TargetAudience() {
             <Image loading='lazy' fill src="/icons/worker.png" alt='Trabalhador' />
           </div>
         </div>
-        <div className={clsx('intervalCardReveal', styles.item, "diagonalLinearBg")}>
+        <div className={clsx('interval-card-reveal', styles.item, "diagonalLinearBg")}>
           <div className={styles.containerText}>
             <p>
               Busca uma formação prática e objetiva.
@@ -33,7 +33,7 @@ export default function TargetAudience() {
             <Image loading='lazy' fill src="/icons/check.png" alt='Check' />
           </div>
         </div>
-        <div className={clsx('intervalCardReveal', styles.item, "diagonalLinearBg")}>
+        <div className={clsx('interval-card-reveal', styles.item, "diagonalLinearBg")}>
           <div className={styles.containerText}>
             <p>
               Quer se profissionalizar em
@@ -45,7 +45,7 @@ export default function TargetAudience() {
             <Image loading='lazy' fill src="/icons/air-conditioning.png" alt='Ar condicionado' />
           </div>
         </div>
-        <div className={clsx('intervalCardReveal', styles.item, "diagonalLinearBg")}>
+        <div className={clsx('interval-card-reveal', styles.item, "diagonalLinearBg")}>
           <div className={styles.containerText}>
             <p>
               Procura uma alternativa de

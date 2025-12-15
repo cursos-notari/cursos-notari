@@ -7,7 +7,7 @@ export default function PublicClassCard({ class: classData }: { class: PublicCla
       {/* Informações principais com divisores */}
       <div className="space-y-2 mb-4">
         <div className='border-b border-gray-100 pb-2'>
-          <h3 className="text-xl text-center text-gray-600 font-semibold">
+          <h3 className="text-xl text-center text-gray-700 font-semibold">
             {classData.name}
           </h3>
         </div>
