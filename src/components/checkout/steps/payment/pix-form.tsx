@@ -1,20 +1,20 @@
 'use client'
 
-import { getClassById } from '@/actions/server/class/get-class-by-id'
-import { createPagBankOrder } from '@/actions/server/payment/create-pagbank-order'
-import { processPixPayment } from '@/actions/server/payment/process-pix-payment'
 import { createPreRegistration } from '@/actions/server/pre-registration/create-pre-registration'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
-import { Spinner } from '@/components/ui/spinner'
-import { useCheckoutData } from '@/contexts/class-data-context'
-import usePersonalData from '@/hooks/zustand/use-personal-data'
 import { pixFormSchema, PixFormSchema } from '@/validation/zod-schemas/pix-form-validation'
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
+import { processPixPayment } from '@/actions/server/payment/process-pix-payment'
+import usePersonalData from '@/hooks/zustand/use-personal-data'
+import { useClassData } from '@/hooks/use-class-data'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Spinner } from '@/components/ui/spinner'
+import { Button } from '@/components/ui/button'
+import { usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
 export default function PixForm() {
 
@@ -26,43 +26,47 @@ export default function PixForm() {
     }
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
-  const { classData } = useCheckoutData();
+  const pathname = usePathname();
 
-  const personalData = usePersonalData((state) => state.personalData)!;
+  const { classData } = useClassData();
 
-  if (!personalData) throw new Error("Dados pessoais não recebidos");
+  const personalData = usePersonalData.getState().personalData;
+
+  if (!personalData) throw new Error("Ocorreu um erro interno. Tente novamente mais tarde");
 
   const handlePixFormSubmit = async (data: PixFormSchema) => {
-
 
     if (!data.acceptContract || !data.acceptPolicy) {
       form.setError("root", {
         message: 'Você precisa aceitar os termos para prosseguir'
-      })
-
+      });
       return
     };
-
     try {
-      const preRegistration = await createPreRegistration({ 
+      const preRegistration = await createPreRegistration({
         classId: classData.id,
-        personalData 
+        personalData
       });
+
+      if (!preRegistration.success || !preRegistration.id) throw new Error('Ocorreu um erro ao processar o pagamento pix.')
 
       const res = await processPixPayment({
         classData,
         preRegistrationId: preRegistration.id,
       });
 
-    } catch (error) {
-      form.setError("root", {
-        message: 'Erro ao processar pagamento'
-      })
+      if (!res.success) throw new Error('Ocorreu um erro ao processar o pagamento pix.');
+
+      router.push(`${pathname}/congrats`);
+
+    } catch (error: any) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao processar pagamento. Tente novamente mais tarde', {
+        position: 'top-center'
+      });
     }
   }
-
 
   return (
     <Card className='shadow-none rounded-none border-x-0'>

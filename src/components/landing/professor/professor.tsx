@@ -5,11 +5,11 @@ import Image from 'next/image'
 
 export default function Professor() {
   return (
-    <section className={clsx('altBg', styles.professor)}>
-      <h1 className={clsx('emphasis text-sky-600 delayMediumReveal', styles.title)}>
+    <section className={styles.professor}>
+      <h1 className={clsx('emphasis text-sky-600 delay-medium-reveal', styles.title)}>
         Quem vai te ensinar
       </h1>
-      <div className={clsx(styles.containerProfessor, "delayLargeReveal")}>
+      <div className={clsx(styles.containerProfessor, "delay-large-reveal")}>
         <div className={styles.containerWrapper}>
           <div className={styles.containerImage}>
             <Image

@@ -2,29 +2,37 @@
 
 import React, { memo } from 'react';
 import { Button } from '@/components/ui/button';
-import PixIcon from '@/components/icons/pix-icon';
+
 import { CreditCard } from 'lucide-react';
 import { IconFileBarcode } from '@tabler/icons-react';
 import { PayMethod } from '@/types/enum/payment-method';
 
+import dynamic from 'next/dynamic';
+import { Spinner } from '@/components/ui/spinner';
+
+const PixIcon = dynamic(() => import('@/components/icons/pix-icon'), {
+  ssr: false, // renderiza direto no cliente
+  loading: () => <Spinner />
+});
+
 interface PaymentMethodSelectorProps {
-  customerName?:  string;
-  selectedPaymentMethod: PayMethod;
+  paymentMethod: PayMethod;
   onPaymentSelect: (method: PayMethod) => void;
 }
 
 const PaymentMethodSelector = memo(function PaymentMethodSelector({
-  customerName,
-  selectedPaymentMethod,
+  paymentMethod,
   onPaymentSelect
 }: PaymentMethodSelectorProps) {
   return (
     <div className="flex flex-col items-center space-y-4 mb-6 max-h-20">
-      <h3 className='text-lg text-center text-gray-600 font-semibold'>{customerName ? `Quase lá ${customerName}, s` : 'S'}elecione a forma de pagamento</h3>
+      <h3 className='text-lg text-center text-gray-600 font-semibold'>
+        Selecione a forma de pagamento
+      </h3>
       <div className='flex space-x-4'>
         <Button
           className='cursor-pointer'
-          variant={selectedPaymentMethod === PayMethod.CREDIT_CARD ? 'personalized' : 'outlinePersonalized'}
+          variant={paymentMethod === PayMethod.CREDIT_CARD ? 'personalized' : 'outlinePersonalized'}
           onClick={() => onPaymentSelect(PayMethod.CREDIT_CARD)}
           aria-label="Selecionar pagamento com cartão de crédito"
         >
@@ -32,15 +40,15 @@ const PaymentMethodSelector = memo(function PaymentMethodSelector({
         </Button>
         <Button
           className='cursor-pointer'
-          variant={selectedPaymentMethod === PayMethod.PIX ? 'personalized' : 'outlinePersonalized'}
+          variant={paymentMethod === PayMethod.PIX ? 'personalized' : 'outlinePersonalized'}
           onClick={() => onPaymentSelect(PayMethod.PIX)}
           aria-label="Selecionar pagamento com PIX"
         >
-          PIX<PixIcon fill={selectedPaymentMethod === PayMethod.PIX ? 'oklch(98.4% 0.003 247.858)' : 'oklch(55.1% 0.027 264.364)'} />
+          PIX<PixIcon fill={paymentMethod === PayMethod.PIX ? 'oklch(98.4% 0.003 247.858)' : 'oklch(55.1% 0.027 264.364)'} />
         </Button>
         <Button
           className='cursor-pointer'
-          variant={selectedPaymentMethod === PayMethod.BOLETO ? 'personalized' : 'outlinePersonalized'}
+          variant={paymentMethod === PayMethod.BOLETO ? 'personalized' : 'outlinePersonalized'}
           onClick={() => onPaymentSelect(PayMethod.BOLETO)}
           aria-label="Selecionar pagamento com boleto"
         >

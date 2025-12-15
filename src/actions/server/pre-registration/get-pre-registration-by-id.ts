@@ -3,7 +3,6 @@ import 'server-only'
 
 import { createServiceClient } from '@/supabase/service-client';
 import { PreRegistration } from '@/types/interfaces/database/pre-registration';
-import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface GetPreRegistrationByIdResult {
   success: boolean;
@@ -35,8 +34,9 @@ export async function getPreRegistrationById(id: string): Promise<GetPreRegistra
     };
   }
 
-  // o banco de dados retorna data, com o erro
-  if (!data.success) console.error(`CÓDIGO: ${data.code} \n Erro ao buscar pré-registro:`, data.message);
+  if (!data.success) {
+    console.error(`CÓDIGO: ${data.code} \n Erro ao buscar pré-registro:`, data.message);
+  }
 
   return data;
 }

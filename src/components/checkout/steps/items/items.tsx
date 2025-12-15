@@ -1,7 +1,8 @@
 import { cn } from '@/utils/cn';
 import { Button } from '@/components/ui/button';
 import { PublicClass } from '@/types/interfaces/database/class';
-import { useCheckoutData } from '@/contexts/class-data-context';
+import { useClassData } from '@/hooks/use-class-data';
+
 
 interface ItemsProps {
   className?: string;
@@ -11,7 +12,7 @@ interface ItemsProps {
 
 export default function Items({ className, onNext}: ItemsProps) {
 
-  const { classData } = useCheckoutData();
+  const { classData } = useClassData();
 
   return (
     <div className={cn('py-7 px-7 bg-background border border-t-0 text-gray-700 space-y-4', className)}>

@@ -1,73 +1,81 @@
 "use client";
 
-import React, { useState, useMemo } from 'react'
+import { clearSensitiveData, encryptCardData, getPublicKey, prepareCardData, validatePagSeguroSDK } from '@/utils/encryptionHelper';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
 import { paymentCardSchema, TPaymentCardSchema } from '@/validation/zod-schemas/payment-card-schema';
+import { createPreRegistration } from '@/actions/server/pre-registration/create-pre-registration';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { creditCardCharge } from '@/actions/server/payment/credit-card-charge';
+import usePersonalData from '@/hooks/zustand/use-personal-data';
+import { formatCardNumber } from '@/utils/format-card-number';
+import { detectCardBrand } from '@/utils/detect-card-brand';
+import 'react-credit-cards-2/dist/es/styles-compiled.css'
+import { usePathname, useRouter } from 'next/navigation';
+import { useCheckout } from '@/hooks/zustand/use-checkout';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useClassData } from '@/hooks/use-class-data';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Spinner } from '@/components/ui/spinner';
+import React, { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useForm } from 'react-hook-form';
 import { Lock } from 'lucide-react';
-import { detectCardBrand } from '@/utils/detect-card-brand';
-import { formatCardNumber } from '@/utils/format-card-number';
-import { Spinner } from '@/components/ui/spinner';
-import { clearSensitiveData, encryptCardData, getPublicKey, prepareCardData, validatePagSeguroSDK } from '@/utils/encryptionHelper';
-import { creditCardCharge } from '@/actions/server/payment/credit-card-charge';
 import { toast } from 'sonner';
-import { Checkbox } from '@/components/ui/checkbox';
-
-import 'react-credit-cards-2/dist/es/styles-compiled.css'
 import dynamic from 'next/dynamic';
-import { createPreRegistration } from '@/actions/server/pre-registration/create-pre-registration';
-import usePersonalData from '@/hooks/zustand/use-personal-data';
-import { useCheckoutData } from '@/contexts/class-data-context';
+import SuccessAnimation from '@/components/animations/success-animation';
 
 const Cards = dynamic(() => import('react-credit-cards-2'), {
   ssr: false, // renderiza direto no cliente
-  loading: () => <div className="flex items-center justify-center h-[180px]"><Spinner /></div>
+  loading: () => <div className="flex items-center justify-center min-w-[290px] min-h-[182.26px]"><Spinner /></div>
 });
 
 const CreditCardForm = React.memo(function CreditCardForm() {
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [focused, setFocused] = useState<'number' | 'expiry' | 'cvc' | 'name' | undefined>();
+  const [paymentAccepted, setPaymentAccepted] = useState(false);
+
+  const { setInstallments, installments: currentInstallments } = useCheckout();
 
   const form = useForm<TPaymentCardSchema>({
     resolver: zodResolver(paymentCardSchema),
     defaultValues: {
-      holderName: '',
-      cardNumber: '',
-      cvv: '',
-      expiryDate: '',
-      installments: 1,
-      acceptPolicy: false,
-      acceptContract: false
+      holderName: 'PEDRO LUCAS ALMEIDA CUNHA',
+      cardNumber: '4539620659922097',
+      cvv: '123',
+      expiryDate: '12/30',
+      installments: currentInstallments,
+      acceptPolicy: true,
+      acceptContract: true
     }
   });
 
-  // Memoização de cálculos caros
+  // memoização de cálculos caros
   const installmentOptions = useMemo(() =>
     Array.from({ length: 12 }, (_, i) => i + 1), []
   );
 
-  // Valores computados
-  // const orderValue = useMemo(() => unitAmount / 100, [unitAmount]);
+  // watch card number once and use it consistently
+  const watchedCardNumber = form.watch('cardNumber');
 
   const cardBrand = useMemo(() =>
-    detectCardBrand(form.watch('cardNumber') || ''),
-    [form.watch('cardNumber')]
+    detectCardBrand(watchedCardNumber || ''),
+    [watchedCardNumber]
   );
 
-  const personalData = usePersonalData(state => state.personalData)!;
+  const router = useRouter();
 
-  const { classData } = useCheckoutData()
+  const pathname = usePathname();
+
+  const personalData = usePersonalData().personalData;
+
+  if (!personalData) throw new Error("Dados pessoais não recebidos");
+
+  const { classData } = useClassData();
 
   const handleCreditCardFormSubmit = async (creditCardData: TPaymentCardSchema,) => {
     try {
-      setIsSubmitting(true);
       validatePagSeguroSDK();
       const publicKey = getPublicKey();
       const cardData = prepareCardData(creditCardData);
@@ -80,24 +88,28 @@ const CreditCardForm = React.memo(function CreditCardForm() {
       // limpa dados sensíveis vindos do formulário
       clearSensitiveData(creditCardData);
 
-      const preRegistration = await createPreRegistration({ personalData, classId: classData.id  });
+      const preRegistration = await createPreRegistration({ personalData, classId: classData.id });
 
-      if (!preRegistration.success || !preRegistration.id) throw new Error("Não foi possível criar o registro");
+      if (!preRegistration.success || !preRegistration.id) {
+        throw new Error("Ocorreu um erro. \n Contate o suporte ou tente novamente mais tarde.");
+      }
 
       const res = await creditCardCharge(preRegistration.id, {
         installments: creditCardData.installments,
         cardToken: encryptedCardToken
       });
 
-      if (!res.success) throw new Error(res.message);
+      if (!res.success) throw new Error("Ocorreu um erro ao processar o pagamento");
 
-    } catch (e) {
-      console.error('Erro no processamento do pagamento:', e);
-      toast.error('Não foi possível processar o pagamento. Tente novamente.', {
+      setPaymentAccepted(true);
+
+      // TODO: TROCAR POR .replace
+      setTimeout(() => router.push(`${pathname}/success`), 1500);
+
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao processar pagamento. Tente novamente mais tarde', {
         position: 'top-center'
       });
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -229,7 +241,11 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                         <FormLabel className='text-gray-700'>Parcelas</FormLabel>
                         <FormControl>
                           <Select
-                            onValueChange={(value) => field.onChange(parseInt(value))}
+                            onValueChange={(value) => {
+                              const installments = parseInt(value);
+                              field.onChange(installments);
+                              setInstallments(installments, classData.registration_fee);
+                            }}
                             value={field.value?.toString() || '1'}
                           >
                             <SelectTrigger className="w-full">
@@ -254,15 +270,21 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                 <div className='border-l border-gray-300 mx-6 h-75'></div>
 
                 <div className='flex flex-col justify-between pb-8 max-w-[290px] w-1/2 space-y-5'>
-                  <div className="relative min-h-[180px]">
-                    <Cards
-                      number={form.watch('cardNumber')}
-                      expiry={form.watch('expiryDate')}
-                      cvc={form.watch('cvv')}
-                      name={form.watch('holderName')}
-                      focused={focused}
-                      locale={{ valid: 'VALIDADE' }}
-                    />
+                  <div className="relative min-h-[180px] max-h-[180px]">
+                    {paymentAccepted
+                      ?
+                      <SuccessAnimation />
+                      :
+                      <Cards
+                        number={watchedCardNumber}
+                        expiry={form.watch('expiryDate')}
+                        cvc={form.watch('cvv')}
+                        name={form.watch('holderName')}
+                        focused={focused}
+                        locale={{ valid: 'VALIDADE' }}
+                        placeholders={{ name: 'SEU NOME AQUI' }}
+                      />
+                    }
                   </div>
 
                   {/* informações de segurança */}
@@ -327,9 +349,9 @@ const CreditCardForm = React.memo(function CreditCardForm() {
               <Button
                 type="submit"
                 className="w-full bg-green-600 hover:bg-green-700 cursor-pointer"
-                disabled={isSubmitting}
+                disabled={form.formState.isSubmitting}
               >
-                {isSubmitting ? <><Spinner />Processando</> : 'Finalizar pedido'}
+                {form.formState.isSubmitting ? <><Spinner />Processando</> : 'Finalizar pedido'}
               </Button>
             </div>
           </form>
@@ -339,4 +361,4 @@ const CreditCardForm = React.memo(function CreditCardForm() {
   );
 });
 
-export default CreditCardForm
+export default CreditCardForm;

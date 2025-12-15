@@ -3,11 +3,7 @@
 import { createContext, useContext } from 'react'
 import { PublicClass } from '@/types/interfaces/database/class'
 
-interface CheckoutContextValue {
-  classData: PublicClass
-}
-
-const CheckoutContext = createContext<CheckoutContextValue | null>(null)
+export const ClassContext = createContext<{ classData: PublicClass } | null>(null);
 
 export function CheckoutProvider({ 
   children, 
@@ -17,16 +13,8 @@ export function CheckoutProvider({
   classData: PublicClass 
 }) {
   return (
-    <CheckoutContext.Provider value={{ classData }}>
+    <ClassContext.Provider value={{ classData }}>
       {children}
-    </CheckoutContext.Provider>
+    </ClassContext.Provider>
   )
-}
-
-export function useCheckoutData() {
-  const context = useContext(CheckoutContext)
-  if (!context) {
-    throw new Error('useCheckoutData must be used within CheckoutProvider')
-  }
-  return context
 }
