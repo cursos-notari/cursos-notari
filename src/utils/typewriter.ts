@@ -1,4 +1,4 @@
-export function typeWriteOnView() {
+export function typeWriter() {
   const elementos = document.querySelectorAll<HTMLElement>(".typewriter");
 
   const observer = new IntersectionObserver(
@@ -12,7 +12,7 @@ export function typeWriteOnView() {
           textoArray.forEach((letra, i) => {
             setTimeout(() => {
               elemento.innerHTML += letra;
-            }, 100 * i);
+            }, 50 * i);
           });
 
           obs.unobserve(elemento); // não precisa mais observar

@@ -101,7 +101,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
   return (
     <Card className="w-full rounded-none border-t-0 max-w-2xl mx-auto">
       <CardHeader>
-        {/* <CardTitle className='emphasis text-2xl'>Inscrição - {classData.name}</CardTitle> */}
+        {/* <CardTitle className='text-linear bg-linear-to-tr linear-colors text-2xl'>Inscrição - {classData.name}</CardTitle> */}
         <CardDescription className='text-sm text-center font-normal'>
           Confirme seus dados. Eles aparecerão em sua nota fiscal.
         </CardDescription>
@@ -111,7 +111,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             {/* fieldset para informações pessoais */}
             <fieldset className="border border-gray-200 p-6 rounded-md space-y-4">
-              <legend className="text-lg font-semibold emphasis px-3">Informações Pessoais</legend>
+              <legend className="text-lg font-semibold text-linear bg-linear-to-tr linear-colors px-3">Informações Pessoais</legend>
               {/* nome e sobrenome */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -119,7 +119,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='emphasis font-medium!'>Nome*</FormLabel>
+                      <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Nome*</FormLabel>
                       <FormControl>
                         <Input className='selection:bg-sky-500'
                           placeholder="Digite seu nome"
@@ -136,7 +136,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                   name="surname"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='emphasis font-medium!'>Sobrenome*</FormLabel>
+                      <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Sobrenome*</FormLabel>
                       <FormControl>
                         <Input className='selection:bg-sky-500'
                           placeholder="Digite seu sobrenome"
@@ -160,7 +160,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
 
                     return (
                       <FormItem className="w-fit min-w-0">
-                        <FormLabel className='emphasis font-medium!'>Data de Nascimento*</FormLabel>
+                        <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Data de Nascimento*</FormLabel>
                         <FormControl>
                           <DatePicker
                             value={field.value}
@@ -187,7 +187,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                   name="cpf"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='emphasis font-medium!'>CPF*</FormLabel>
+                      <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>CPF*</FormLabel>
                       <FormControl>
                         <Input className='selection:bg-sky-500'
                           placeholder="000.000.000-00"
@@ -214,7 +214,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='emphasis font-medium!'>WhatsApp*</FormLabel>
+                      <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>WhatsApp*</FormLabel>
                       <FormControl>
                         <Input className='selection:bg-sky-500'
                           placeholder="(11) 99999-9999"
@@ -237,7 +237,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='emphasis font-medium!'>E-mail*</FormLabel>
+                      <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>E-mail*</FormLabel>
                       <FormControl>
                         <Input className='selection:bg-sky-500'
                           type="email"
@@ -257,7 +257,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
 
             {/* fieldset para endereço */}
             <fieldset className="border border-gray-200 p-6 rounded-md space-y-4">
-              <legend className="text-lg font-semibold emphasis px-3">Endereço</legend>
+              <legend className="text-lg font-semibold text-linear bg-linear-to-tr linear-colors px-3">Endereço</legend>
 
               {/* CEP e rua */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -266,7 +266,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                   name="postalCode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='emphasis font-medium!'>CEP*</FormLabel>
+                      <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>CEP*</FormLabel>
                       <FormControl>
                         <Input className='selection:bg-sky-500'
                           placeholder="00000-000"
@@ -289,7 +289,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                   name="street"
                   render={({ field }) => (
                     <FormItem className="md:col-span-2">
-                      <FormLabel className='emphasis font-medium!'>Rua*</FormLabel>
+                      <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Rua*</FormLabel>
                       <FormControl>
                         <Input className='selection:bg-sky-500'
                           placeholder="Nome da rua"
@@ -311,7 +311,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                     name="number"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className='emphasis font-medium!'>Número*</FormLabel>
+                        <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Número*</FormLabel>
                         <FormControl>
                           <Input className='selection:bg-sky-500'
                             placeholder="123"
@@ -358,7 +358,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                   name="complement"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='emphasis font-medium!'>Complemento</FormLabel>
+                      <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Complemento</FormLabel>
                       <FormControl>
                         <Input className='selection:bg-sky-500'
                           placeholder="Apto, bloco, etc. (opcional)"
@@ -378,7 +378,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                   name="locality"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='emphasis font-medium!'>Bairro*</FormLabel>
+                      <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Bairro*</FormLabel>
                       <FormControl>
                         <Input className='selection:bg-sky-500'
                           placeholder="Centro"
@@ -399,7 +399,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                   name="regionCode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='emphasis font-medium!'>UF*</FormLabel>
+                      <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>UF*</FormLabel>
                       <FormControl>
                         <Input
                           className='selection:bg-sky-500'
@@ -407,7 +407,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                           readOnly
                           {...field}
                           value="SP" // Sempre SP
-                          onChange={() => {}} // previne qualquer mudança
+                          onChange={() => { }} // previne qualquer mudança
                         />
                       </FormControl>
                       <FormMessage />
@@ -420,7 +420,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                   name="city"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className='emphasis font-medium!'>Cidade*</FormLabel>
+                      <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Cidade*</FormLabel>
                       <FormControl>
                         {isLoadingCities ? (
                           <div className="flex items-center justify-center h-10 border rounded-md">
@@ -452,11 +452,11 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
               render={({ field }) => (
                 <FormItem className="hidden">
                   <FormControl>
-                    <Input 
-                      type="hidden" 
-                      {...field} 
-                      value="São Paulo" 
-                      onChange={() => {}} // previne qualquer mudança
+                    <Input
+                      type="hidden"
+                      {...field}
+                      value="São Paulo"
+                      onChange={() => { }} // previne qualquer mudança
                     />
                   </FormControl>
                 </FormItem>
@@ -467,7 +467,10 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
               type="submit"
               variant='personalized'
               className='w-full'
-              disabled={form.formState.isSubmitting}
+              disabled={
+                form.formState.isSubmitting 
+                // || isFetchingAddress // TODO: DESCOMENTAR
+              }
             >
               {form.formState.isSubmitting ? <Loader2Icon className='animate-spin' /> : 'Avançar'}
             </Button>

@@ -5,7 +5,7 @@ import Header from '@/components/landing/header';
 export default async function LandingPage() {
   return (
     <ScrollRevealWrapper>
-      <div className="h-screen [&>section]:flex [&>section]:min-h-screen [&>section]:py-[3.3%] [&>section]:px-[5%] [&>section]:border-b-2 [&>section]:border-(--primary-gray)">
+      <div className="h-screen [&>section]:flex [&>section]:min-h-screen [&>section]:h-screen [&>section]:py-10 [&>section]:px-15 [&>section]:border-b [&>section]:border-gray-200">
         <Header/>
         <Hero />
         <Public />

@@ -20,8 +20,7 @@ import { Spinner } from '@/components/ui/spinner';
 import React, { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useForm } from 'react-hook-form';
-import { Lock } from 'lucide-react';
+import { useForm } from 'react-hook-form';;
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
 import SuccessAnimation from '@/components/animations/success-animation';
@@ -60,9 +59,8 @@ const CreditCardForm = React.memo(function CreditCardForm() {
   const watchedCardNumber = form.watch('cardNumber');
 
   const cardBrand = useMemo(() =>
-    detectCardBrand(watchedCardNumber || ''),
-    [watchedCardNumber]
-  );
+    detectCardBrand(watchedCardNumber || '')
+  ,[watchedCardNumber]);
 
   const router = useRouter();
 
@@ -287,12 +285,6 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                     }
                   </div>
 
-                  {/* informações de segurança */}
-                  {/* <div className="flex items-center justify-center gap-2 text-xs text-gray-600 bg-accent p-3 rounded-md">
-                <Lock className="w-3 h-3" />
-                <span>Suas informações estão seguras</span>
-              </div> */}
-
                   <FormField
                     control={form.control}
                     name="acceptPolicy"
@@ -310,7 +302,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                           <FormLabel className='text-xs! text-gray-700'>
                             <p>
                               Eu li e aceito os
-                              <a className='emphasis underline' target='_blank' href=""> termos de política de privacidade </a>
+                              <a className='text-sky-500 font-semibold underline' target='_blank' href=""> termos de política de privacidade </a>
                               da Cursos Notari
                             </p>
                           </FormLabel>
@@ -336,7 +328,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                           <FormLabel className='text-xs! text-gray-700'>
                             <p>
                               Li e aceito os
-                              <a className='emphasis' target='_blank' href=""> termos do contrato </a>
+                              <a className='text-sky-500 font-semibold underline' target='_blank' href=""> termos do contrato </a>
                               do curso oferecido pela empresa
                             </p>
                           </FormLabel>

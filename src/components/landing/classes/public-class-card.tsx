@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { PublicClass } from '@/types/interfaces/database/class';
+import { Button } from '@/components/ui/button';
 
 export default function PublicClassCard({ class: classData }: { class: PublicClass }) {
   return (
-    <div key={classData.id} className="flex flex-col h-full border rounded-lg p-4 justify-between shadow-md w-full max-w-sm">
+    <div key={classData.id} className="flex flex-col h-full border rounded-lg p-4 justify-center space-y-5 shadow-md w-full max-w-sm">
       {/* Informações principais com divisores */}
-      <div className="space-y-2 mb-4">
+      <div className="space-y-3">
         <div className='border-b border-gray-100 pb-2'>
           <h3 className="text-xl text-center text-gray-700 font-semibold">
             {classData.name}
@@ -65,7 +66,7 @@ export default function PublicClassCard({ class: classData }: { class: PublicCla
       </div>
 
       {/* Preço */}
-      <div className="mb-4 border bg-gray-50 rounded-lg p-4 text-center">
+      <div className="border bg-gray-50 rounded-lg p-4 text-center">
         <p className="text-sm text-gray-600 mb-2">
           de <span className="line-through font-semibold">R$ 600,00</span> por apenas
         </p>
@@ -87,11 +88,14 @@ export default function PublicClassCard({ class: classData }: { class: PublicCla
       </div>
 
       {/* CTA */}
-      <Link
-        href={`/checkout/${classData.id}`}
-        className="uppercase leftLinearBg text-background! w-full py-3 outline-none border-none rounded-full text-lg tracking-wider text-center transition-transform duration-300 ease-in-out hover:scale-[1.02]"
-      >
-        GARANTIR MINHA VAGA
+      <Link href={`/checkout/${classData.id}`}>
+        <Button
+          type='button'
+          size='lg'
+          className='w-full h-11 bg-linear-to-r from-sky-500 via-sky-400 to-sky-300 cursor-pointer tracking-widest transition-transform hover:scale-102 hover:shadow duration-200'
+        >
+          QUERO GARANTIR MINHA VAGA
+        </Button>
       </Link>
     </div>
   )

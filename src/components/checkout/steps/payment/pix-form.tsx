@@ -98,7 +98,7 @@ export default function PixForm() {
                     <FormLabel className='text-sm! text-gray-700'>
                       <p>
                         Eu li e aceito os
-                        <a className='emphasis underline' target='_blank' href=""> termos de política de privacidade </a>
+                        <a className='text-sky-500 font-semibold underline' target='_blank' href=""> termos de política de privacidade </a>
                         da Cursos Notari
                       </p>
                     </FormLabel>
@@ -124,7 +124,7 @@ export default function PixForm() {
                     <FormLabel className='text-sm! text-gray-700'>
                       <p>
                         Li e aceito os
-                        <a className='emphasis' target='_blank' href=""> termos do contrato </a>
+                        <a className='text-sky-500 font-semibold underline' target='_blank' href=""> termos do contrato </a>
                         do curso oferecido pela empresa
                       </p>
                     </FormLabel>
