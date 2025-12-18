@@ -14,8 +14,7 @@ export default function PaymentMethods() {
   const { paymentMethod, setPaymentMethod } = useCheckout();
 
   const handlePaymentMethodChange = (method: PayMethod) => {
-    setPaymentMethod(method, classData.registration_fee);[]
-    console.log(paymentMethod)
+    setPaymentMethod(method, classData.registration_fee);
   };
 
   return (

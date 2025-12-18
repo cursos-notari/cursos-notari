@@ -1,5 +1,5 @@
 export { default as Public } from './target-audience/target-audience'
-export { default as Hero } from './hero/hero'
+export { default as Hero } from './hero'
 export { default as Learning } from './learning/learning'
 export { default as Professor } from './professor/professor'
 export { default as Classes } from './classes/classes'

@@ -12,13 +12,18 @@ html::-webkit-scrollbar-track {
 }
 
 html::-webkit-scrollbar-thumb {
-  background-color: var(--primary-blue);
+  background-color: var(--color-sky-500);
   border-radius: 6px;
   border: 2px solid var(--background);
 }
 
 html::-webkit-scrollbar-thumb:hover {
-  background-color: var(--semidark-blue);
+  cursor: grab;
+  background-color: var(--color-sky-600);
+}
+
+html::-webkit-scrollbar-thumb:active {
+  cursor: grabbing;
 }
 
 .typewriter:after {
@@ -27,14 +32,4 @@ html::-webkit-scrollbar-thumb:hover {
   opacity: 1;
   animation: blink 1s infinite;
   background-color: var(--light-blue);
-}
-
-@keyframes blink {
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0;
-  }
 }

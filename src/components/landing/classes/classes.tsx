@@ -11,8 +11,8 @@ async function ClassesList() {
 
   return (
 
-    <div className='flex flex-col w-full gap-6 items-center'>
-      <h2 id='classes' className='text-sky-500 font-bold text-[2.5rem]'>
+    <div className='flex flex-col w-full gap-10 items-center'>
+      <h2 id='classes' className='text-4xl font-semibold text-linear bg-linear-to-tl linear-colors'>
         Turmas Disponíveis
       </h2>
       <div className="flex flex-wrap w-full gap-6 h-[480px] justify-center">
@@ -24,7 +24,7 @@ async function ClassesList() {
 
 export default function ClassesSection() {
   return (
-    <section>
+    <section id='classes'>
       <Suspense fallback={<PublicClassCardSkeleton />}>
         <ClassesList />
       </Suspense>

@@ -1,11 +1,9 @@
-import styles from './learning.module.css'
-import clsx from 'clsx'
 import Modules from './modules'
 
 export default function Learning() {
   return (
-    <section className={styles.learning}>
-      <h1 className={clsx('emphasis text-sky-600 delay-medium-reveal', styles.title)}>
+    <section id='learning' className='flex-col gap-8'>
+      <h1 className='text-4xl font-semibold text-linear bg-linear-to-tl linear-colors delay-medium-reveal'>
         O que você vai aprender
       </h1>
       <Modules />
