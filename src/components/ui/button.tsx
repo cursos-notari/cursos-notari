@@ -22,7 +22,7 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         personalized: 
-          "cursor-pointer border bg-sky-500 hover:bg-sky-500/80 text-slate-50 shadow-xs hover:text-slate-100 transition-colors dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "cursor-pointer bg-sky-500 hover:bg-sky-500/80 text-slate-50 shadow-xs hover:text-slate-100 transition-colors dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

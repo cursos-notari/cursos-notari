@@ -5,14 +5,17 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 export default function Header() {
+
   const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {
-    const handleScroll = () => {
-      setHasScrolled(window.scrollY > 0)
-    }
 
-    window.addEventListener('scroll', handleScroll)
+    setHasScrolled(window.scrollY > 0)
+
+    const handleScroll = () => setHasScrolled(window.scrollY > 0);
+
+    window.addEventListener('scroll', handleScroll);
+
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 

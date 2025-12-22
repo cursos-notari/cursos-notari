@@ -8,6 +8,7 @@ interface ScrollRevealWrapperProps {
 }
 
 export function ScrollRevealWrapper({ children }: ScrollRevealWrapperProps) {
+  
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => { 
@@ -18,10 +19,13 @@ export function ScrollRevealWrapper({ children }: ScrollRevealWrapperProps) {
     initReveal();
   }, []);
 
-  // precisa controlar a opacidade e o carregamento pra não aparecer nada antes do fade
-
   return (
-    <div style={{ opacity: isLoaded ? 1 : 0, transition: 'opacity 0.3s ease' }}>
+    <div
+      style={{ 
+        opacity: isLoaded ? 1 : 0, 
+        transition: 'opacity 0.3s ease' 
+      }}
+    >
       {children}
     </div>
   );
