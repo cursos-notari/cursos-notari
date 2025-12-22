@@ -22,7 +22,7 @@ export interface PreRegistration {
   
   pagbank_order_id: string | null;
   pagbank_order_data: Order; // jsonb é mapeado para um objeto genérico
-  order_created_at: string | null;
+  pagbank_order_created_at: string | null;
   
   created_at: string;
   updated_at: string;

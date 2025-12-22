@@ -18,15 +18,9 @@ interface CreatePreRegistrationReturn {
 
 export async function createPreRegistration({ classId, personalData }: CreatePreRegistrationParams): Promise<CreatePreRegistrationReturn> {
 
-  if (!personalData) {
-    console.error('Dados do usuário não recebidos');
-    return { success: false }
-  }
-
   const isValidData = personalDataFormSchema.safeParse(personalData);
 
   if (!isValidData.success) {
-    console.log('erro de validação: ', isValidData.error);
     return {
       success: false,
       message: 'Dados inválidos',
@@ -56,18 +50,18 @@ export async function createPreRegistration({ classId, personalData }: CreatePre
   });
 
   if (error) {
-    console.error("Erro na RPC create_pre_registration:", error.message);
+    console.error("Erro na RPC create_pre_registration:", error);
     return {
       success: false,
-      message: error.message,
-      code: error.code,
     }
   }
 
   if (!result.success) {
     console.error(`${result.code} : ${result.message}`);
     return {
-      success: false
+      success: false,
+      message: result.message,
+      code: result.code
     }
   }
 

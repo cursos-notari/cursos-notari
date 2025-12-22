@@ -6,7 +6,6 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { paymentCardSchema, TPaymentCardSchema } from '@/validation/zod-schemas/payment-card-schema';
 import { createPreRegistration } from '@/actions/server/pre-registration/create-pre-registration';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { creditCardCharge } from '@/actions/server/payment/credit-card-charge';
 import usePersonalData from '@/hooks/zustand/use-personal-data';
 import { formatCardNumber } from '@/utils/format-card-number';
 import { detectCardBrand } from '@/utils/detect-card-brand';
@@ -24,6 +23,7 @@ import { useForm } from 'react-hook-form';;
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
 import SuccessAnimation from '@/components/animations/success-animation';
+import { processCreditCardPayment } from '@/actions/server/payment/process-credit-card-payment';
 
 const Cards = dynamic(() => import('react-credit-cards-2'), {
   ssr: false, // renderiza direto no cliente
@@ -60,7 +60,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
 
   const cardBrand = useMemo(() =>
     detectCardBrand(watchedCardNumber || '')
-  ,[watchedCardNumber]);
+    , [watchedCardNumber]);
 
   const router = useRouter();
 
@@ -89,15 +89,24 @@ const CreditCardForm = React.memo(function CreditCardForm() {
       const preRegistration = await createPreRegistration({ personalData, classId: classData.id });
 
       if (!preRegistration.success || !preRegistration.id) {
-        throw new Error("Ocorreu um erro. \n Contate o suporte ou tente novamente mais tarde.");
+        throw new Error(
+          (preRegistration.code === 'internal_error' || !preRegistration.message) ?
+            "Ocorreu um erro. Contate o suporte ou tente novamente mais tarde." :
+            preRegistration.message
+        );
       }
 
-      const res = await creditCardCharge(preRegistration.id, {
+      const res = await processCreditCardPayment({
+        preRegistrationId: preRegistration.id,
+        classData: classData,
         installments: creditCardData.installments,
-        cardToken: encryptedCardToken
+        creditCardToken: encryptedCardToken
       });
 
-      if (!res.success) throw new Error("Ocorreu um erro ao processar o pagamento");
+      if (!res.success) throw new Error(
+        
+        "Ocorreu um erro ao processar o pagamento"
+      );
 
       setPaymentAccepted(true);
 

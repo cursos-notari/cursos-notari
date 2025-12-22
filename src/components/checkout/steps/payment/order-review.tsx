@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useClassData } from '@/hooks/use-class-data';
 import { useCheckout } from '@/hooks/zustand/use-checkout';
 import { useEffect } from 'react';
-
 import { Info } from 'lucide-react';
 
 export default function OrderReview() {

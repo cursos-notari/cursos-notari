@@ -1,45 +1,39 @@
 'use server';
+import 'server-only';
+import axios, { AxiosError } from 'axios';
 
-import { createServiceClient } from "@/supabase/service-client";
-import { getPreRegistrationById } from "../pre-registration/get-pre-registration-by-id";
 import { confirmPayment } from "../pre-registration/confirm-payment";
+import { Order } from '@/types/interfaces/payment/pagbank/order';
 
 export interface CreditCardChargeResult {
   success: boolean;
+  retryable?: boolean;
   message?: string;
   orderId?: string;
 }
 
-export interface TokenizedPaymentData {
+export interface CreditCardChargeParams {
+  pagBankOrder: Order;
+  creditCardToken: string;
   installments: number;
-  cardToken: string;
+  preRegistrationId: string;
 }
 
-export async function creditCardCharge(
-  preRegistrationId: string,
-  creditCardToken: TokenizedPaymentData
+export async function creditCardCharge({
+  preRegistrationId,
+  pagBankOrder,
+  creditCardToken,
+  installments
+}: CreditCardChargeParams
 ): Promise<CreditCardChargeResult> {
 
   try {
-    const supabase = createServiceClient();
+    const { links, items } = pagBankOrder;
 
-    if (!supabase) return { success: false }
+    if (!links?.[1].href) throw new Error('URL de pagamento não encontrada');
 
-    const preRegistration = await getPreRegistrationById(preRegistrationId);
-
-    if (!preRegistration.success || !preRegistration.data) {
-      return { success: false };
-    }
-
-    const { pagbank_order_id, pagbank_order_data } = preRegistration.data;
-    
-    if (!pagbank_order_id || !pagbank_order_data) {
-      return { success: false };
-    }
-
-    const orderId = pagbank_order_id;
-    const paymentUrl = pagbank_order_data.links![1].href;
-    const orderAmountInCents = pagbank_order_data.items[0].unit_amount;
+    const paymentUrl = links![1].href;
+    const orderAmountInCents = items[0].unit_amount;
 
     const requestBody = {
       charges: [{
@@ -49,70 +43,189 @@ export async function creditCardCharge(
         },
         payment_method: {
           type: "CREDIT_CARD",
-          installments: creditCardToken.installments,
+          installments: installments,
           capture: true,
           card: {
-            encrypted: creditCardToken.cardToken
+            encrypted: creditCardToken,
+            store: false
           }
         }
       }]
     };
 
-    const response = await fetch(paymentUrl, {
-      method: "POST",
+    const response = await axios.post<Order>(paymentUrl, requestBody, {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.PAGBANK_API_TOKEN}`,
       },
-      body: JSON.stringify(requestBody),
+      timeout: 30000 // 30 segundos
     });
 
-    const responseData = await response.json();
+    const data = response.data;
 
-    if (!response.ok) {
-      console.error("Erro ao processar pagamento:", responseData);
+    // TODO: VERIFICAR TODOS OS CASOS DE ERRO POSSÍVEIS E SE PODE RETENTAR OU NÃO O PAGAMENTO.
+
+    if (response.status < 200 || response.status >= 300) {
+      console.error('Resposta com status inesperado:', response.status);
       return {
         success: false,
-        message: responseData.error_messages?.[0]?.description ?? null,
+        message: 'Erro ao processar pagamento',
+        retryable: response.status >= 500
+      }
+    }
+
+    const charge = data.charges?.[0];
+
+    if (!charge) {
+      console.error('Nenhuma cobrança retornada na resposta');
+      return {
+        success: false,
+        message: 'Erro ao processar cobrança',
+        retryable: false
       };
     }
 
-    const charge = responseData.charges?.[0];
-    
-    // verificar status do pagamento
-    if (charge?.status !== 'PAID') {
+    // verifica status do pagamento
+    if (charge.status !== 'PAID') {
+      const errorMessage = charge.payment_response?.message || "O pagamento não foi aprovado.";
+      console.error('Pagamento não aprovado:', errorMessage);
+
       return {
         success: false,
-        message: charge?.payment_response?.message || "O pagamento não foi aprovado.",
+        message: errorMessage,
+        retryable: false // TODO: VERIFICAR POSSIBILIDADE DE RETENTAR (DOC API PAGBANK)
       };
     }
-    
-    // const confirmResult = await confirmPayment({
-    //   preRegistrationId,
-    //   orderId,
-    //   chargeData: responseData, // salva os dados completos da resposta
-    // });
 
-    // if (!confirmResult.success) {
-    //   console.error("CRÍTICO: Pagamento aprovado mas não confirmado no DB", {
-    //     preRegistrationId,
-    //     orderId,
-    //     error: confirmResult.message
-    //   });
-      
-    //   return {
-    //     success: false,
-    //     message: "Pagamento aprovado, mas houve um erro ao processar. Entre em contato com o suporte informando o código: " + orderId,
-    //   };
-    // }
+    const resPaymentConfirmation = await confirmPayment({
+      preRegistrationId,
+      orderId: data.id,
+      order: data
+    });
+
+    if (!resPaymentConfirmation.success) {
+      console.error("Pagamento aprovado mas não confirmado no DB");
+
+      return {
+        success: false,
+        message: "Pagamento aprovado, mas houve um erro ao processar. Entre em contato com o suporte informando o código: " + data.id,
+        retryable: false
+      };
+    }
 
     return {
       success: true,
-      orderId: orderId,
+      orderId: data.id
     };
 
   } catch (error) {
-    console.error("Erro ao processar pagamento:", error);
-    return { success: false };
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError;
+
+      if (axiosError.response) {
+        const status = axiosError.response.status;
+        const data = axiosError.response.data as any;
+
+        console.error('Erro na resposta:', {
+          status,
+          data,
+          headers: axiosError.response.headers
+        });
+
+        // Mapeamento de erros comuns do PagBank
+        switch (status) {
+          case 400:
+            return {
+              success: false,
+              message: data?.error_messages?.[0]?.description || 'Dados inválidos',
+              retryable: false
+            };
+
+          case 401:
+            return {
+              success: false,
+              message: 'Erro de autenticação com PagBank',
+              retryable: true // pode ser problema temporário de token
+            };
+
+          case 402:
+            return {
+              success: false,
+              message: 'Pagamento recusado',
+              retryable: false
+            };
+
+          case 429:
+            return {
+              success: false,
+              message: 'Muitas requisições. Tente novamente em alguns instantes.',
+              retryable: true
+            };
+
+          case 500:
+          case 502:
+          case 503:
+          case 504:
+            return {
+              success: false,
+              message: 'Erro temporário no serviço de pagamento. Tente novamente.',
+              retryable: true
+            };
+
+          default:
+            return {
+              success: false,
+              message: 'Erro ao processar pagamento',
+              retryable: status >= 500
+            };
+        }
+      }
+
+      // Erros de requisição (timeout, network, etc)
+      if (axiosError.request) {
+        console.error('Erro na requisição (sem resposta):', {
+          code: axiosError.code,
+          message: axiosError.message
+        });
+
+        if (axiosError.code === 'ECONNABORTED') {
+          return {
+            success: false,
+            message: 'Tempo esgotado. Tente novamente.',
+            retryable: true
+          };
+        }
+
+        if (axiosError.code === 'ERR_NETWORK') {
+          return {
+            success: false,
+            message: 'Erro de conexão. Verifique sua internet.',
+            retryable: true
+          };
+        }
+
+        return {
+          success: false,
+          message: 'Erro de comunicação com serviço de pagamento',
+          retryable: true
+        };
+      }
+
+      // Erro na configuração da requisição
+      console.error('Erro na configuração:', axiosError.message);
+      return {
+        success: false,
+        message: 'Erro interno ao processar pagamento',
+        retryable: false
+      };
+    }
+
+    // Outros erros não relacionados ao Axios
+    console.error('Erro inesperado:', error);
+    return {
+      success: false,
+      message: 'Erro inesperado ao processar pagamento',
+      retryable: false
+    };
   }
 }

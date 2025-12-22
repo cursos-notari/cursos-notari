@@ -95,14 +95,12 @@ export async function createPagBankOrder({
       .update({
         pagbank_order_id: order.id,
         pagbank_order_data: order,
-        order_created_at: order.created_at
+        pagbank_order_created_at: order.created_at
       })
       .eq('id', preRegistrationData.id);
 
     if (updateError) {
       console.error("Erro ao salvar o pedido no banco:", updateError);
-      // mesmo com erro ao salvar, retorna a ordem criada para não bloquear o fluxo
-      // mas loga o erro para investigação
     }
 
     return {

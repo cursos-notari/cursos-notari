@@ -1,54 +1,42 @@
 'use server'
+import 'server-only';
 
 import { createServiceClient } from "@/supabase/service-client";
+import { Order } from '@/types/interfaces/payment/pagbank/order';
 
 export interface ConfirmPaymentResult {
   success: boolean;
-  message: string;
-  data?: any;
-  confirmed_at?: string;
+  message?: string;
 }
 
 export async function confirmPayment({
   preRegistrationId,
   orderId,
-  chargeData,
+  order,
 }: {
   preRegistrationId: string;
   orderId: string;
-  chargeData: any;
+  order: Order;
 }): Promise<ConfirmPaymentResult> {
-  try {
-    const supabase = createServiceClient();
+  
+  const supabase = createServiceClient();
 
-    if (!supabase) {
-      return {
-        success: false,
-        message: 'Erro interno: cliente Supabase não disponível'
-      };
-    }
+  if (!supabase) { return { success: false } }
 
-    const { data, error } = await supabase.rpc('confirm_payment', {
-      p_id: preRegistrationId,
-      p_order_id: orderId,
-      p_charge_data: chargeData
-    });
+  const { data, error } = await supabase.rpc('confirm_payment', {
+    p_id: preRegistrationId,
+    p_order_id: orderId,
+    p_order_data: order
+  });
 
-    if (error) {
-      console.error("Erro ao chamar RPC confirm_payment:", error);
-      return {
-        success: false,
-        message: "Não foi possível confirmar o pagamento. Tente novamente.",
-      };
-    }
-
-    return data as ConfirmPaymentResult;
-
-  } catch (error: any) {
-    console.error("Erro inesperado ao confirmar pagamento:", error);
+  if (error) {
+    console.error("Erro ao chamar RPC confirm_payment:", error);
     return {
       success: false,
-      message: error.message || "Erro inesperado ao processar confirmação.",
     };
   }
+
+  if (!data.success) { return { success: false } };
+
+  return { success: true }
 }
