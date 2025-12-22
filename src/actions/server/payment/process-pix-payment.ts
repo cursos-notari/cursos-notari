@@ -6,10 +6,9 @@ import { getPreRegistrationById } from "../pre-registration/get-pre-registration
 import { PublicClass } from "@/types/interfaces/database/class";
 import { Order } from '@/types/interfaces/payment/pagbank/order';
 import { isOrderExpired } from '@/utils/is-order-expired';
-import { cookies } from 'next/headers';
 
-interface ProcessPixPaymentProps {
-  preRegistrationId: string,
+interface ProcessPixPaymentParams {
+  preRegistrationId: string;
   classData: PublicClass;
 }
 
@@ -17,7 +16,7 @@ interface ProcessPixPaymentReturn {
   success: boolean;
 }
 
-export async function processPixPayment({ preRegistrationId, classData }: ProcessPixPaymentProps): Promise<ProcessPixPaymentReturn> {
+export async function processPixPayment({ preRegistrationId, classData }: ProcessPixPaymentParams): Promise<ProcessPixPaymentReturn> {
   try {
     const preRegistration = await getPreRegistrationById(preRegistrationId);
 
@@ -27,8 +26,13 @@ export async function processPixPayment({ preRegistrationId, classData }: Proces
       }
     }
 
-    const existingOrderData: Order | null | undefined = preRegistration.data?.pagbank_order_data;
-    const existingOrderCreatedAt = existingOrderData?.created_at;
+    const {
+      pagbank_order_data,
+      pagbank_order_created_at
+    } = preRegistration.data;
+
+    const existingOrderData: Order | null | undefined = pagbank_order_data;
+    const existingOrderCreatedAt = pagbank_order_created_at;
 
     let pagBankOrder: Order;
 

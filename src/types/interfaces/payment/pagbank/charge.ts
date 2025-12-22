@@ -109,7 +109,7 @@ export interface Charge {
   // identificador da cobrança pagbank.
   id: string;
   // status da cobrança.
-  status: 'authorized' | 'paid' | 'in_analysis' | 'declined' | 'canceled' | 'waiting';
+  status: 'AUTHORIZED' | 'PAID' | 'IN_ANALYSIS' | 'DECLINED' | 'CANCELED' | 'WAITING';
   // data e horário em que foi criada.
   createdAt: string; 
   // data e horário em que foi paga.
@@ -123,9 +123,9 @@ export interface Charge {
   // resumo de valores da cobrança.
   summary?: ChargeSummary;
   // informações de resposta do provedor de pagamento.
-  paymentResponse?: PaymentResponse;
+  payment_response?: PaymentResponse;
   // informações do método de pagamento.
-  paymentMethod: PaymentMethod;
+  payment_method: PaymentMethod;
   // objeto contendo os qr codes vinculados.
   qrCodes?: QrCode[];
 }
