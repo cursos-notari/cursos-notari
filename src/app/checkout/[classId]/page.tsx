@@ -6,6 +6,8 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CheckoutProvider } from "@/contexts/class-data-context";
+import CheckoutSkeleton from "@/components/skeletons/checkout-skeleton";
+import { isValidUUID } from "@/utils/is-valid-UUID";
 
 export const metadata: Metadata = {
   title: 'Checkout | Cursos Notari',
@@ -22,9 +24,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ classId: st
         height={200}
         priority
       />
-
-      {/* // TODO: CRIAR SKELETON DESCENTE */}
-      <Suspense fallback={<>Carregando...</>}>
+      
+      <Suspense fallback={<CheckoutSkeleton/>}>
         <CheckoutContent params={params} />
       </Suspense>
     </div>
@@ -35,9 +36,13 @@ async function CheckoutContent({ params }: { params: Promise<{ classId: string }
 
   const { classId } = await params;
 
+  const isValidId = isValidUUID(classId);
+
+  if(!isValidId) notFound();
+
   const res = await getClassById(classId);
 
-  if (!res.success) throw new Error(res.message);
+  if (!res.success) throw new Error("Ocorreu um erro interno");
 
   if (!res.data) notFound();
 

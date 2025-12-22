@@ -5,43 +5,35 @@ import { PublicClass } from "@/types/interfaces/database/class";
 import { cacheLife } from "next/cache";
 import { createServiceClient } from "@/supabase/service-client";
 
-interface Return {
+interface GetClassByIdReturn {
   success: boolean;
   data?: PublicClass;
-  code?: string;
-  message: string;
 }
 
-export const getClassById = cache(async (classId: string): Promise<Return> => {
+export const getClassById = cache(async (classId: string): Promise<GetClassByIdReturn> => {
+
   "use cache"
 
   cacheLife('seconds');
 
   const supabase = createServiceClient();
 
-  if(!supabase) return {
-    success: false,
-    message: "Não foi possível criar o cliente supabase",
-  }
+  if(!supabase) return { success: false }
 
   const { data, error } = await supabase
     .from('open_classes')
     .select('*')
     .eq('id', classId)
-    .maybeSingle();
+    .maybeSingle()
+  ;
 
   if (error) {
     console.error(`${error.code}:`, error.message);
-    return {
-      success: false,
-      code: error.code,
-      message: error.message
-    };
+    return { success: false };
   }
 
   return {
     success: true,
-    message: 'Turma encontrada com sucesso.',
     data: data
   };
 })

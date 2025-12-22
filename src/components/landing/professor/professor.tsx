@@ -30,7 +30,7 @@ export default function Professor() {
         <div className='lg:w-3/5 flex flex-col justify-center space-y-6 p-8'>
           {/* Nome e Título */}
           <div className='space-y-1'>
-            <h2 className='text-3xl md:text-4xl font-bold text-stone-900 tracking-tight'>
+            <h2 className='text-3xl md:text-4xl font-bold text-stone-800 tracking-tight'>
               LEANDRO NOTARI
             </h2>
             <div className='h-1 w-24 bg-linear-to-r linear-colors rounded-full'></div>
@@ -46,7 +46,7 @@ export default function Professor() {
                 </svg>
               </div>
               <div>
-                <h3 className='text-lg font-bold text-stone-900'>Engenheiro Mecânico</h3>
+                <h3 className='text-lg font-bold text-stone-800'>Engenheiro Mecânico</h3>
                 <p className='text-sm text-stone-600'>Especializado em PMOC (Plano de Manutenção, Operação e Controle)</p>
               </div>
             </div>
@@ -59,7 +59,7 @@ export default function Professor() {
                 </svg>
               </div>
               <div>
-                <h3 className='text-lg font-bold text-stone-900'>Pós-Graduação</h3>
+                <h3 className='text-lg font-bold text-stone-800'>Pós-Graduação</h3>
                 <p className='text-sm text-stone-600'>Especialista em Segurança do Trabalho</p>
               </div>
             </div>
@@ -72,7 +72,7 @@ export default function Professor() {
                 </svg>
               </div>
               <div>
-                <h3 className='text-lg font-bold text-stone-900'>Diretor da Notari Engenharia</h3>
+                <h3 className='text-lg font-bold text-stone-800'>Diretor da Notari Engenharia</h3>
                 <p className='text-sm text-stone-600'>Empresa líder em climatização e refrigeração com ampla experiência no mercado</p>
               </div>
             </div>
