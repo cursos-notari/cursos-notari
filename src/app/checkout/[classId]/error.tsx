@@ -10,7 +10,7 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
+    // TODO: AO SUBIR PRA PRODUÇÃO, INTEGRAR SENTRY
     console.error(error)
   }, [error])
  
@@ -18,10 +18,7 @@ export default function Error({
     <div>
       <h2>Algo deu errado!</h2>
       <button
-        onClick={
-          // Attempt to recover by trying to re-render the segment
-          () => reset()
-        }
+        onClick={() => reset()}
       >
         Try again
       </button>
