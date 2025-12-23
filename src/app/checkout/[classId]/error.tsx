@@ -10,7 +10,7 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    // TODO: AO SUBIR PRA PRODUÇÃO, INTEGRAR SENTRY
+    // TODO: AO SUBIR PRA PRODUÇÃO, INTEGRAR SENTRY OU OUTRA PLATAFORMA DE REGISTRO DE ERROS
     console.error(error)
   }, [error])
  

@@ -27,12 +27,17 @@ import { processCreditCardPayment } from '@/actions/server/payment/process-credi
 
 const Cards = dynamic(() => import('react-credit-cards-2'), {
   ssr: false, // renderiza direto no cliente
-  loading: () => <div className="flex items-center justify-center min-w-[290px] min-h-[182.26px]"><Spinner /></div>
+  loading: () => (
+    <div className="flex items-center justify-center min-w-[290px] min-h-[182.26px]">
+      <Spinner />
+    </div>
+  )
 });
 
 const CreditCardForm = React.memo(function CreditCardForm() {
 
   const [focused, setFocused] = useState<'number' | 'expiry' | 'cvc' | 'name' | undefined>();
+
   const [paymentAccepted, setPaymentAccepted] = useState(false);
 
   const { setInstallments, installments: currentInstallments } = useCheckout();
@@ -55,18 +60,18 @@ const CreditCardForm = React.memo(function CreditCardForm() {
     Array.from({ length: 12 }, (_, i) => i + 1), []
   );
 
-  // watch card number once and use it consistently
+  // observa o número do cartão
   const watchedCardNumber = form.watch('cardNumber');
 
-  const cardBrand = useMemo(() =>
-    detectCardBrand(watchedCardNumber || '')
-    , [watchedCardNumber]);
+  const cardBrand = useMemo(() => {
+    return detectCardBrand(watchedCardNumber || '')
+  }, [watchedCardNumber]);
 
   const router = useRouter();
 
   const pathname = usePathname();
 
-  const personalData = usePersonalData().personalData;
+  const personalData = usePersonalData(state => state.personalData);
 
   if (!personalData) throw new Error("Dados pessoais não recebidos");
 
@@ -104,7 +109,6 @@ const CreditCardForm = React.memo(function CreditCardForm() {
       });
 
       if (!res.success) throw new Error(
-        
         "Ocorreu um erro ao processar o pagamento"
       );
 

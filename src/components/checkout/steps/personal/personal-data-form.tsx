@@ -8,52 +8,48 @@ import { Input } from '@/components/ui/input'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { formatCPF } from '@/utils/format-CPF'
 import { formatPhone } from '@/utils/format-phone'
 import { formatCEP } from '@/utils/format-CEP'
 import { Loader2Icon } from 'lucide-react'
-import { defaultValuesMock } from '@/mocks/personal-data-mock'
 import { useQuery } from '@tanstack/react-query'
 import { getAddressByCEP } from '@/services/get-address-by-cep'
 import { useEffect } from 'react'
 import { Combobox } from '@/components/ui/combobox'
 import { getCitiesByUF } from '@/services/get-cities-by-uf'
 import usePersonalData from '@/hooks/zustand/use-personal-data'
+import { useSyncFormWithStore } from '@/hooks/use-sync-form-with-store'
 
-interface PersonalDataFormProps {
-  onNext: () => void;
-}
-
-export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
+export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
 
   const personalData = usePersonalData((state) => state.personalData);
+  
   const setPersonalData = usePersonalData((state) => state.setPersonalData);
 
   const form = useForm<PersonalDataFormSchema>({
     resolver: zodResolver(personalDataFormSchema),
-    // defaultValues: {
-    //   ...personalData,
-    //   state: 'São Paulo',
-    //   regionCode: 'SP'
-    // } || {
-    //   name: '',
-    //   surname: '',
-    //   cpf: '',
-    //   email: '',
-    //   birthdate: undefined,
-    //   phone: '',
-    //   street: '',
-    //   number: '',
-    //   noNumber: false,
-    //   complement: '',
-    //   locality: '',
-    //   city: '',
-    //   regionCode: 'SP',
-    //   state: 'São Paulo',
-    //   postalCode: '',
-    // },
-    defaultValues: defaultValuesMock,
+    defaultValues: personalData ? {
+      ...personalData,
+      state: 'São Paulo',
+      regionCode: 'SP'
+    } : {
+      name: '',
+      surname: '',
+      cpf: '',
+      email: '',
+      birthdate: undefined,
+      phone: '',
+      street: '',
+      number: '',
+      noNumber: false,
+      complement: '',
+      locality: '',
+      city: '',
+      regionCode: 'SP',
+      state: 'São Paulo',
+      postalCode: '',
+    },
     mode: 'onChange'
   })
 
@@ -72,15 +68,17 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
     }
   })
 
-  const { data: address, isFetching: isFetchingAddress } = useQuery({
+  const { data: address, isFetching: isFetchingAddress, error: addressError } = useQuery({
     queryKey: ['cep', cep],
     queryFn: () => getAddressByCEP(cep),
     enabled: cep.length === 8,
     staleTime: Infinity,
+    retry: false,
+    retryDelay: 0,
     select: (data) => ({
-      street: data.logradouro || '',
-      locality: data.bairro || '',
-      city: data.localidade || '',
+      street: data?.logradouro || '',
+      locality: data?.bairro || '',
+      city: data?.localidade || '',
       regionCode: 'SP',
       state: 'São Paulo',
     }),
@@ -89,9 +87,23 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
   useEffect(() => {
 
     if (!address) return;
-
+    
     form.reset({ ...form.getValues(), ...address });
+    
   }, [address]);
+
+   useEffect(() => {
+    if (addressError && cep.length === 8) {
+      form.setError('postalCode', {
+        type: 'manual',
+        message: addressError instanceof Error ? addressError.message : 'Erro ao buscar CEP'
+      });
+    } else if (!addressError && cep.length === 8) {
+      form.clearErrors('postalCode');
+    }
+  }, [addressError, cep, form]);
+
+  useSyncFormWithStore(form.watch);
 
   const handleSubmit = async (data: PersonalDataFormSchema) => {
     setPersonalData(data);
@@ -467,10 +479,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
               type="submit"
               variant='personalized'
               className='w-full'
-              disabled={
-                form.formState.isSubmitting 
-                // || isFetchingAddress // TODO: DESCOMENTAR
-              }
+              disabled={form.formState.isSubmitting|| isFetchingAddress}
             >
               {form.formState.isSubmitting ? <Loader2Icon className='animate-spin' /> : 'Avançar'}
             </Button>
