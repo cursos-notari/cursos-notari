@@ -4,10 +4,12 @@ import { cache } from "react";
 import { PublicClass } from "@/types/interfaces/database/class";
 import { cacheLife } from "next/cache";
 import { createServiceClient } from "@/supabase/service-client";
+import { PostgrestError } from "@supabase/supabase-js";
 
 interface GetClassByIdReturn {
   success: boolean;
   data?: PublicClass;
+  error?: PostgrestError | { message: string };
 }
 
 export const getClassById = cache(async (classId: string): Promise<GetClassByIdReturn> => {
@@ -18,7 +20,12 @@ export const getClassById = cache(async (classId: string): Promise<GetClassByIdR
 
   const supabase = createServiceClient();
 
-  if(!supabase) return { success: false }
+  if(!supabase) return { 
+    success: false,
+    error: {
+      message: "Ocorreu um erro ao tentar criar cliente Supabase"
+    }
+  }
 
   const { data, error } = await supabase
     .from('open_classes')
@@ -28,8 +35,10 @@ export const getClassById = cache(async (classId: string): Promise<GetClassByIdR
   ;
 
   if (error) {
-    console.error(`${error.code}:`, error.message);
-    return { success: false };
+    return { 
+      success: false,
+      error: error
+    };
   }
 
   return {

@@ -18,18 +18,6 @@ export async function createPagBankOrder({
   preRegistrationData
 }: CreatePagBankOrderParams) {
 
-  if (!preRegistrationData) {
-    return {
-      success: false,
-      message: "Dados de inscrição não recebidos."
-    }
-  } else if (!classData) {
-    return {
-      success: false,
-      message: "Dados da turma não recebidos."
-    }
-  }
-
   // dia e hora de expiração do QRCode
   const expirationDate = new Date();
 
@@ -76,20 +64,18 @@ export async function createPagBankOrder({
 
     if (!response.ok) {
       const error = await response.json();
-      console.error("Erro ao criar ordem no PagBank:", error);
-      return {
-        success: false,
-        message: "Não foi possível iniciar o processo de pagamento."
-      };
+
+      console.error("Erro ao criar pedido PagBank:", error);
+      return { success: false };
     }
 
     const order: Order = await response.json();
 
     const supabase = createServiceClient();
 
-    if (!supabase) return { success: false }
+    if (!supabase) return { success: false };
 
-    // salva os dados da ordem no banco de dados
+    // salva os dados do pedido no banco de dados
     const { error: updateError } = await supabase
       .from('pre_registrations')
       .update({
@@ -105,15 +91,11 @@ export async function createPagBankOrder({
 
     return {
       success: true,
-      message: "Pedido criado com sucesso.",
       data: order
     }
 
   } catch (error) {
-    console.error("Erro ao tentar criar pedido:", error);
-    return {
-      success: false,
-      message: "Ocorreu um erro de comunicação com o sistema de pagamento."
-    };
+    console.error("Erro ao tentar criar pedido PagBank:", error);
+    return { success: false };
   }
 }

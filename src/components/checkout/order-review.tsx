@@ -2,32 +2,22 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useClassData } from '@/hooks/use-class-data';
-import { useCheckout } from '@/hooks/zustand/use-checkout';
-import { useEffect } from 'react';
+import { usePaymentMethods } from '@/hooks/zustand/use-payment-methods';
+import { useEffect, useRef } from 'react';
 import { Info } from 'lucide-react';
 
 export default function OrderReview() {
-
   const { classData } = useClassData();
   const { registration_fee } = classData;
-  const { installments, installmentsPrice, setInstallments } = useCheckout();
+  
+  const installments = usePaymentMethods((state) => state.installments);
+  const installmentsPrice = usePaymentMethods((state) => state.installmentsPrice);
+  const setInstallments = usePaymentMethods((state) => state.setInstallments);
 
-  // inicializar o checkout com os dados da classe
-  useEffect(() => {
-    if (registration_fee && installmentsPrice === null) {
-      setInstallments(12, registration_fee);
-    }
-  }, [registration_fee, installmentsPrice, setInstallments]);
 
   useEffect(() => {
-    if (registration_fee && installmentsPrice !== null) {
-      // Recalcula se houver inconsistência
-      const expectedPrice = registration_fee / installments;
-      if (Math.abs(installmentsPrice - expectedPrice) > 0.01) {
-        setInstallments(installments, registration_fee);
-      }
-    }
-  }, [installments, registration_fee, installmentsPrice, setInstallments]);
+    if (registration_fee) setInstallments(12, registration_fee);
+  }, [registration_fee, setInstallments]);
 
   return (
     <aside className='md:sticky top-10 flex flex-col w-full self-start md:max-w-md h-fit'>

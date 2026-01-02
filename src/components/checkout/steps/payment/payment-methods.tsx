@@ -2,16 +2,17 @@
 
 import PaymentMethodSelector from './payment-method-selector';
 import { PayMethod } from '@/types/enum/payment-method';
-import { Shield, ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import PixForm from './pix-form';
 import CreditCardForm from './credit-card-form';
-import { useCheckout } from '@/hooks/zustand/use-checkout';
+import { usePaymentMethods } from '@/hooks/zustand/use-payment-methods';
 import { useClassData } from '@/hooks/use-class-data';
+
 
 export default function PaymentMethods() {
 
   const { classData } = useClassData();
-  const { paymentMethod, setPaymentMethod } = useCheckout();
+  const { paymentMethod, setPaymentMethod } = usePaymentMethods();
 
   const handlePaymentMethodChange = (method: PayMethod) => {
     setPaymentMethod(method, classData.registration_fee);

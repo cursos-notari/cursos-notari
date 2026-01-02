@@ -1,31 +1,16 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import StepButton from './step-button';
 import Items from '@/components/checkout/steps/items/items';
 import PersonalDataForm from '@/components/checkout/steps/personal/personal-data-form';
 import PaymentMethods from '@/components/checkout/steps/payment/payment-methods';
 import { CircleUserRound, CreditCard, LucideProps, ShoppingBag } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { useCheckoutSteps } from '@/hooks/zustand/use-checkout-steps';
 
 export default function CheckoutSteps() {
-
-  const [currentStep, setCurrentStep] = useState<number>(0);
-  const [maxStepReached, setMaxStepReached] = useState<number>(0);
-
-  const nextStep = () => {
-    if (currentStep < 2) {
-      const newStep = currentStep + 1;
-      setCurrentStep(newStep);
-      setMaxStepReached(prev => Math.max(prev, newStep));
-    }
-  }
-
-  const goToStep = (stepId: number) => {
-    if (stepId < currentStep && stepId <= maxStepReached) {
-      setCurrentStep(stepId);
-    }
-  }
+  const { currentStep, nextStep, goToStep } = useCheckoutSteps();
 
   const steps: Array<{
     id: number;
@@ -53,7 +38,7 @@ export default function CheckoutSteps() {
         icon: CreditCard,
         text: 'Informações de pagamento',
         component: PaymentMethods,
-        props: {}
+        props: { goToStep }
       },
     ];
 

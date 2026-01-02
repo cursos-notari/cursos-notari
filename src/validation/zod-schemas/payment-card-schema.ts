@@ -32,11 +32,6 @@ const validateCardNumberLuhn = (cardNumber: string): boolean => {
   return (sum % 10) === 0;
 };
 
-// função para validar CVV
-const validateCVV = (cvv: string) => {
-  return /^\d{3,4}$/.test(cvv);
-};
-
 const validateExpiryFormat = (expiryDate: string): boolean => {
   const dateParts = expiryDate.split('/');
 
@@ -83,25 +78,25 @@ const isCardNotExpired = (expiryDate: string): boolean => {
 export const paymentCardSchema = z.object({
   holderName: z
     .string()
-    .nonempty("Nome do titular é obrigatório")
+    .nonempty("Informe o nome do titular")
     .min(3, "Digite o nome como está no cartão")
     .max(50, "Nome muito longo")
-    .regex(/^[a-zA-ZÀ-ÿ\s]+$/, "Nome deve conter apenas letras e espaços"),
+    .regex(/^[a-zA-ZÀ-ÿ\s]+$/, "O nome deve conter apenas letras e espaços"),
 
   cardNumber: z
     .string()
-    .nonempty("Número do cartão é obrigatório")
+    .nonempty("Informe o número do cartão")
     .min(16, "O número precisa ter pelo menos 16 dígitos")
     .refine(validateCardNumberLuhn, "Número do cartão inválido"),
 
   cvv: z
     .string()
-    .min(1, "CVV é obrigatório")
-    .refine(validateCVV, "Deve ter 3 ou 4 dígitos"),
+    .min(1, "Informe o CVV")
+    .regex(/^\d{3,4}$/, "CVV inválido"),
 
-  expiryDate: z
+  expirationDate: z
     .string()
-    .min(1, "Validade é obrigatória")
+    .min(1, "Informe a validade")
     .refine(validateExpiryFormat, "Formato inválido")
     .refine(isCardNotExpired, "Cartão expirado"),
 
@@ -113,15 +108,15 @@ export const paymentCardSchema = z.object({
   acceptContract: z.boolean()
     .refine((val) => val === true, "Você deve aceitar os termos do contrato"),
 
-   acceptPolicy: z.boolean()
+  acceptPolicy: z.boolean()
     .refine((val) => val === true, "Você deve aceitar os termos de política de privacidade"),
-    
+
 }).superRefine((data, ctx) => {
-  if (data.expiryDate && !isCardNotExpired(data.expiryDate)) {
+  if (data.expirationDate && !isCardNotExpired(data.expirationDate)) {
     ctx.addIssue({
       code: "custom",
       message: "Cartão expirado",
-      path: ["expiryDate"],
+      path: ["expirationDate"],
     });
   }
 });

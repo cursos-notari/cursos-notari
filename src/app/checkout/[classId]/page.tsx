@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { getClassById } from "@/actions/server/class/get-class-by-id";
-import OrderReview from "@/components/checkout/steps/payment/order-review";
+import OrderReview from "@/components/checkout/order-review";
 import CheckoutSteps from "./checkout-steps";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -42,7 +42,7 @@ async function CheckoutContent({ params }: { params: Promise<{ classId: string }
 
   const res = await getClassById(classId);
 
-  if (!res.success) throw new Error("Ocorreu um erro interno");
+  if (!res.success) throw new Error(res.error?.message);
 
   if (!res.data) notFound();
 

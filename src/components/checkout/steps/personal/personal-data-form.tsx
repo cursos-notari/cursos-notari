@@ -8,54 +8,53 @@ import { Input } from '@/components/ui/input'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { formatCPF } from '@/utils/format-CPF'
 import { formatPhone } from '@/utils/format-phone'
 import { formatCEP } from '@/utils/format-CEP'
 import { Loader2Icon } from 'lucide-react'
-import { defaultValuesMock } from '@/mocks/personal-data-mock'
 import { useQuery } from '@tanstack/react-query'
 import { getAddressByCEP } from '@/services/get-address-by-cep'
 import { useEffect } from 'react'
 import { Combobox } from '@/components/ui/combobox'
 import { getCitiesByUF } from '@/services/get-cities-by-uf'
 import usePersonalData from '@/hooks/zustand/use-personal-data'
+import { useSyncFormWithStore } from '@/hooks/use-sync-form-with-store'
+import { useCheckoutSteps } from '@/hooks/zustand/use-checkout-steps'
 
-interface PersonalDataFormProps {
-  onNext: () => void;
-}
-
-export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
+export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
 
   const personalData = usePersonalData((state) => state.personalData);
-  const setPersonalData = usePersonalData((state) => state.setPersonalData);
+
+  const updateField = usePersonalData((state) => state.updatePersonalDataField);
+  const pendingErrors = useCheckoutSteps((state) => state.pendingErrors);
+  const setPendingErrors = useCheckoutSteps((state) => state.setPendingErrors);
 
   const form = useForm<PersonalDataFormSchema>({
     resolver: zodResolver(personalDataFormSchema),
-    // defaultValues: {
-    //   ...personalData,
-    //   state: 'São Paulo',
-    //   regionCode: 'SP'
-    // } || {
-    //   name: '',
-    //   surname: '',
-    //   cpf: '',
-    //   email: '',
-    //   birthdate: undefined,
-    //   phone: '',
-    //   street: '',
-    //   number: '',
-    //   noNumber: false,
-    //   complement: '',
-    //   locality: '',
-    //   city: '',
-    //   regionCode: 'SP',
-    //   state: 'São Paulo',
-    //   postalCode: '',
-    // },
-    defaultValues: defaultValuesMock,
+    defaultValues: personalData ? {
+      ...personalData,
+      state: 'São Paulo',
+      regionCode: 'SP'
+    } : {
+      name: '',
+      surname: '',
+      cpf: '',
+      email: '',
+      birthdate: undefined,
+      phone: '',
+      street: '',
+      number: '',
+      noNumber: false,
+      complement: '',
+      locality: '',
+      city: '',
+      regionCode: 'SP',
+      state: 'São Paulo',
+      postalCode: '',
+    },
     mode: 'onChange'
-  })
+  });
 
   const cep = form.watch('postalCode');
 
@@ -72,15 +71,17 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
     }
   })
 
-  const { data: address, isFetching: isFetchingAddress } = useQuery({
+  const { data: address, isFetching: isFetchingAddress, error: addressError } = useQuery({
     queryKey: ['cep', cep],
     queryFn: () => getAddressByCEP(cep),
     enabled: cep.length === 8,
     staleTime: Infinity,
+    retry: false,
+    retryDelay: 0,
     select: (data) => ({
-      street: data.logradouro || '',
-      locality: data.bairro || '',
-      city: data.localidade || '',
+      street: data?.logradouro || '',
+      locality: data?.bairro || '',
+      city: data?.localidade || '',
       regionCode: 'SP',
       state: 'São Paulo',
     }),
@@ -91,24 +92,54 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
     if (!address) return;
 
     form.reset({ ...form.getValues(), ...address });
+
   }, [address]);
 
-  const handleSubmit = async (data: PersonalDataFormSchema) => {
-    setPersonalData(data);
-    onNext();
-  }
+  useEffect(() => {
+    if (addressError && cep.length === 8) {
+      form.setError('postalCode', {
+        type: 'manual',
+        message: addressError instanceof Error ? addressError.message : 'Erro ao buscar CEP'
+      });
+    } else if (!addressError && cep.length === 8) {
+      form.clearErrors('postalCode');
+    }
+  }, [addressError, cep, form]);
+
+  useEffect(() => {
+    if (pendingErrors && pendingErrors.length > 0) {
+      pendingErrors.forEach((error) => {
+        form.setError(error.field, {
+          type: 'manual',
+          message: error.message
+        });
+      });
+
+      const firstErrorField = pendingErrors[0]?.field;
+      if (firstErrorField) {
+        // aguarda a renderização completa e o scroll
+        setTimeout(() => {
+          form.setFocus(firstErrorField);
+
+        }, 100); // 100ms para garantir que o DOM está pronto
+      }
+
+      setPendingErrors(null);
+    }
+  }, [pendingErrors, form, setPendingErrors]);
+
+  useSyncFormWithStore(form.watch, updateField);
 
   return (
     <Card className="w-full rounded-none border-t-0 max-w-2xl mx-auto">
       <CardHeader>
-        {/* <CardTitle className='text-linear bg-linear-to-tr linear-colors text-2xl'>Inscrição - {classData.name}</CardTitle> */}
         <CardDescription className='text-sm text-center font-normal'>
           Confirme seus dados. Eles aparecerão em sua nota fiscal.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(() => onNext())} className="space-y-6">
             {/* fieldset para informações pessoais */}
             <fieldset className="border border-gray-200 p-6 rounded-md space-y-4">
               <legend className="text-lg font-semibold text-linear bg-linear-to-tr linear-colors px-3">Informações Pessoais</legend>
@@ -126,7 +157,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -143,7 +174,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -175,7 +206,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                         <FormDescription className={`text-xs ${isAgeError ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
                           *Você deve ter pelo menos 17 anos para se cadastrar
                         </FormDescription>
-                        {!isAgeError && <FormMessage />}
+                        {!isAgeError && <FormMessage className='text-xs' />}
                       </FormItem>
                     );
                   }}
@@ -191,16 +222,15 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                       <FormControl>
                         <Input className='selection:bg-sky-500'
                           placeholder="000.000.000-00"
-                          {...field}
+                          value={formatCPF(field.value)}
                           onChange={(e) => {
-
-                            const formatted = formatCPF(e.target.value)
-                            field.onChange(formatted)
+                            const unformatted = e.target.value.replace(/\D/g, '')
+                            field.onChange(unformatted)
                           }}
                           maxLength={14}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -218,15 +248,15 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                       <FormControl>
                         <Input className='selection:bg-sky-500'
                           placeholder="(11) 99999-9999"
-                          {...field}
+                          value={formatPhone(field.value)}
                           onChange={(e) => {
-                            const formatted = formatPhone(e.target.value)
-                            field.onChange(formatted)
+                            const unformatted = e.target.value.replace(/\D/g, '');
+                            field.onChange(unformatted);
                           }}
                           maxLength={15}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -248,7 +278,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                           }}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -279,7 +309,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                           maxLength={9}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -297,7 +327,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -333,7 +363,10 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                                   checked={field.value}
                                   onCheckedChange={(checked) => {
                                     field.onChange(checked)
-                                    if (checked) form.setValue('number', '')
+                                    if (checked) {
+                                      form.setValue('number', '')
+                                      form.clearErrors('number')
+                                    }
                                   }}
                                   variant="custom"
                                   className="cursor-pointer"
@@ -347,7 +380,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                             </FormItem>
                           )}
                         />
-                        <FormMessage />
+                        <FormMessage className='text-xs' />
                       </FormItem>
                     )}
                   />
@@ -365,7 +398,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -389,7 +422,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                           }}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -410,7 +443,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                           onChange={() => { }} // previne qualquer mudança
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -418,7 +451,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                 <FormField
                   control={form.control}
                   name="city"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Cidade*</FormLabel>
                       <FormControl>
@@ -429,7 +462,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                         ) : citiesItems ? (
                           <Combobox
                             disabled={isFetchingAddress}
-                            className='w-full cursor-pointer font-normal hover:text-gray-600'
+                            className={`w-full cursor-pointer font-normal hover:text-gray-600 ${fieldState.error ? 'border-red-500' : ''}`}
                             comboboxPlaceholder='Selecione a cidade'
                             searchOptionPlaceholder='Busque a cidade'
                             items={citiesItems}
@@ -438,7 +471,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
                           />
                         ) : null}
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -467,10 +500,7 @@ export default function PersonalDataForm({ onNext }: PersonalDataFormProps) {
               type="submit"
               variant='personalized'
               className='w-full'
-              disabled={
-                form.formState.isSubmitting 
-                // || isFetchingAddress // TODO: DESCOMENTAR
-              }
+              disabled={form.formState.isSubmitting || isFetchingAddress}
             >
               {form.formState.isSubmitting ? <Loader2Icon className='animate-spin' /> : 'Avançar'}
             </Button>

@@ -3,18 +3,18 @@ import { isValidCPF } from "@/utils/is-valid-CPF";
 
 export const personalDataFormSchema = z.object({
   name: z.string()
-    .nonempty("Informe seu nome")
     .trim()
-    .min(2, "Insira um nome válido")
-    .max(50, "Insira no máximo 50 caracteres")
-    .regex(/^[a-zA-ZÀ-ÿ\s]+$/, "O nome deve conter apenas letras"),
+    .pipe(z.string().nonempty("Informe seu nome"))
+    .pipe(z.string().min(2, "Informe um nome válido"))
+    .pipe(z.string().max(50, "Insira no máximo 50 caracteres"))
+    .pipe(z.string().regex(/^[a-zA-ZÀ-ÿ\s]+$/, "O nome deve conter apenas letras")),
 
   surname: z.string()
-    .nonempty("Informe seu sobrenome")
     .trim()
-    .min(2, "Insira um sobrenome válido")
-    .max(50, "Insira no máximo 50 caracteres")
-    .regex(/^[a-zA-ZÀ-ÿ\s]+$/, "Insira apenas letras"),
+    .pipe(z.string().nonempty("Informe seu sobrenome"))
+    .pipe(z.string().min(2, "Informe um sobrenome válido (mínimo 2 caracteres)"))
+    .pipe(z.string().max(50, "Insira no máximo 50 caracteres"))
+    .pipe(z.string().regex(/^[a-zA-ZÀ-ÿ\s]+$/, "Insira apenas letras")),
 
   birthdate: z.date({
     message: "Informe sua data de nascimento",
@@ -32,32 +32,28 @@ export const personalDataFormSchema = z.object({
   }),
 
   cpf: z.string()
-    .nonempty("Informe seu CPF")
-    .transform((cpf) => cpf.replace(/[^\d]/g, '')) // remove tudo que não é número
-    .pipe(
-      z.string()
-        .length(11, "Insira o CPF completo")
-        .refine((cpf) => isValidCPF(cpf), "CPF inválido")
-    ),
+    .transform((cpf) => cpf.replace(/[^\d]/g, ''))
+    .pipe(z.string().nonempty(('Informe seu CPF')))
+    .pipe(z.string().length(11, "Informe um CPF válido (11 dígitos)"))
+    .pipe(z.string().refine((cpf) => isValidCPF(cpf), "CPF inválido")),
 
-  email: z.email("Informe um e-mail válido"),
+  email: z.string()
+    .trim()
+    .pipe(z.string().nonempty("Informe seu e-mail"))
+    .pipe(z.email("Informe um e-mail válido")),
 
   phone: z.string()
-    .transform((telefone) => telefone.replace(/[^\d]/g, '')) // remove tudo que não é número
-    .pipe(
-      z.string()
-        .nonempty("Informe seu WhatsApp")
-        .min(11, "O número deve ter pelo menos 11 dígitos")
-        .max(11, "O número deve ter no máximo 11 dígitos")
-        .regex(/^\d+$/, "O número deve conter apenas números")
-    ),
+    .transform((telefone) => telefone.replace(/[^\d]/g, ''))
+    .pipe(z.string().nonempty(("Informe seu número do WhatsApp")))
+    .pipe(z.string().length(11, "Informe um WhatsApp válido (11 dígitos)"))
+    .pipe(z.string().regex(/^\d+$/, "O número deve conter apenas números")),
 
   street: z.string()
-    .nonempty("Informe o nome da rua")
     .trim()
-    .min(5, "O nome da rua deve ter pelo menos 5 caracteres")
-    .max(100, "O nome da rua deve ter no máximo 100 caracteres")
-    .regex(/^[a-zA-Z0-9À-ÿ\s.,'-]+$/, "Insira uma cidade válida"),
+    .pipe(z.string().nonempty("Informe o nome da sua rua"))
+    .pipe(z.string().min(5, "O nome da rua deve ter pelo menos 5 caracteres"))
+    .pipe(z.string().max(100, "O nome da rua deve ter no máximo 100 caracteres"))
+    .pipe(z.string().regex(/^[a-zA-Z0-9À-ÿ\s.,'-]+$/, "Insira um endereço válido")),
 
   number: z.string()
     .max(4, "Insira no máximo 4 caracteres"),
@@ -69,38 +65,34 @@ export const personalDataFormSchema = z.object({
     .optional(),
 
   locality: z.string()
-    .nonempty("Informe o bairro")
-    .min(2, "Informe um bairro válido")
-    .max(50, "Insira no máximo 50 caracteres")
-    .regex(/^[a-zA-ZÀ-ÿ\s'-]+$/, "Insira um bairro válido"),
+    .trim()
+    .pipe(z.string().nonempty("Informe o nome do seu bairro"))
+    .pipe(z.string().min(2, "Informe um bairro válido (mínimo 2 caracteres)"))
+    .pipe(z.string().max(50, "Insira no máximo 50 caracteres"))
+    .pipe(z.string().regex(/^[a-zA-ZÀ-ÿ\s'-]+$/, "Insira um bairro válido")),
 
   city: z.string()
-    .nonempty("Informe a cidade")
     .trim()
-    .min(2, "Informe uma cidade válida")
-    .max(50, "Cidade deve ter no máximo 50 caracteres")
-    .regex(/^[a-zA-ZÀ-ÿ\s'-]+$/, "Insira um nome válido"),
+    .pipe(z.string().nonempty('Informe o nome da sua cidade'))
+    .pipe(z.string().min(2, "Informe uma cidade válida"))
+    .pipe(z.string().max(50, "O nome da cidade deve ter no máximo 50 caracteres"))
+    .pipe(z.string().regex(/^[a-zA-ZÀ-ÿ\s'-]+$/, "Insira um nome válido")),
 
   regionCode: z.string()
-    .length(2, "Estado deve ter 2 caracteres")
-    .regex(/^[A-Z]{2}$/, "Estado deve conter apenas letras maiúsculas"),
+    .pipe(z.string().length(2, "Estado deve ter 2 caracteres"))
+    .pipe(z.string().regex(/^[A-Z]{2}$/, "Estado deve conter apenas letras maiúsculas")),
 
   postalCode: z.string()
-  .nonempty("Informe o CEP")
-    .transform((cep) => cep.replace(/[^\d]/g, '')) // remove tudo que não é número
-    .pipe(
-      z.string()
-        .length(8, "O CEP deve ter 8 dígitos")
-        .regex(/^\d+$/, "CEP deve conter apenas números")
-    ),
+    .transform((cep) => cep.replace(/[^\d]/g, ''))
+    .pipe(z.string().nonempty("Informe seu CEP"))
+    .pipe(z.string().length(8, "Informe um CEP válido"))
+    .pipe(z.string().regex(/^\d+$/, "CEP deve conter apenas números")),
 
-  state: z.string().nonempty("Informe o estado"),
+  state: z.string()
+    .trim()
+    .pipe(z.string().min(1, "Informe o estado")),
 
-  // acceptTerms: z.boolean()
-  //   .refine((val) => val === true, "Você deve aceitar os termos de política de privacidade"),
-
-  // acceptEmails: z.boolean(),
-}).refine((data) => data.noNumber || data.number.trim().length >   0, {
+}).refine((data) => data.noNumber || data.number.trim().length > 0, {
   message: "Informe o número ou marque 'Sem número'",
   path: ["number"],
 });

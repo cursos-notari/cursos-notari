@@ -15,24 +15,31 @@ import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { useCheckoutSteps } from '@/hooks/zustand/use-checkout-steps'
+import usePixData from '@/hooks/zustand/use-pix-data'
+import { useSyncFormWithStore } from '@/hooks/use-sync-form-with-store'
 
 export default function PixForm() {
 
+  const pixData = usePixData(state => state.pixData);
+  const updateField = usePixData(state => state.updatePixDataField);
+  const resetPixData = usePixData(state => state.resetPixData);
+
   const form = useForm<PixFormSchema>({
     resolver: zodResolver(pixFormSchema),
-    defaultValues: {
-      acceptContract: false,
-      acceptPolicy: false
-    }
+    defaultValues: pixData
   });
 
+  // Sincroniza o formulário com o Zustand
+  useSyncFormWithStore(form.watch, updateField);
+
   const router = useRouter();
-
   const pathname = usePathname();
-
   const { classData } = useClassData();
 
-  const personalData = usePersonalData.getState().personalData;
+  const personalData = usePersonalData(state => state.personalData);
+  const setPendingErrors = useCheckoutSteps(state => state.setPendingErrors);
+  const goToStep = useCheckoutSteps(state => state.goToStep);
 
   if (!personalData) throw new Error("Ocorreu um erro interno. Tente novamente mais tarde");
 
@@ -42,29 +49,49 @@ export default function PixForm() {
       form.setError("root", {
         message: 'Você precisa aceitar os termos para prosseguir'
       });
-      return
-    };
+      return;
+    }
+    
     try {
       const preRegistration = await createPreRegistration({
         classId: classData.id,
         personalData
       });
 
-      if (!preRegistration.success || !preRegistration.id) throw new Error('Ocorreu um erro ao processar o pagamento pix.')
+      if (!preRegistration.success) {
+        if (preRegistration.code === 'invalid_data') {
+          setPendingErrors(preRegistration.errors);
+          goToStep(1);
+        }
+        throw new Error(
+          preRegistration.message || 'Ocorreu um erro interno ao criar seu registro'
+        );
+      }
+
+      if (!preRegistration.success || !preRegistration.id) {
+        throw new Error('Ocorreu um erro ao processar o pagamento pix.');
+      }
 
       const res = await processPixPayment({
         classData,
         preRegistrationId: preRegistration.id,
       });
 
-      if (!res.success) throw new Error('Ocorreu um erro ao processar o pagamento pix.');
+      if (!res.success) {
+        throw new Error('Ocorreu um erro ao processar o pagamento pix.');
+      }
 
+      // Reseta os dados do PIX após sucesso
+      resetPixData();
       router.push(`${pathname}/congrats`);
 
     } catch (error: any) {
-      toast.error(error instanceof Error ? error.message : 'Erro ao processar pagamento. Tente novamente mais tarde', {
-        position: 'top-center'
-      });
+      toast.error(
+        error instanceof Error 
+          ? error.message 
+          : 'Erro ao processar pagamento. Tente novamente mais tarde', 
+        { position: 'top-center' }
+      );
     }
   }
 

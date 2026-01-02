@@ -15,7 +15,7 @@ export default function Items({ className, onNext}: ItemsProps) {
   const { classData } = useClassData();
 
   return (
-    <div className={cn('p-7 bg-background border border-t-0 text-gray-700 space-y-7', className)}>
+    <div className={cn('p-7 bg-background border border-t-0 text-gray-700 space-y-7 shadow-sm', className)}>
       <div className='flex justify-between'>
         <div className='w-7/10 space-y-2'>
           <p className='font-medium'>Curso {classData.name}</p>
