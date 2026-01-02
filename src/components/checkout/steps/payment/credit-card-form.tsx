@@ -1,6 +1,6 @@
 "use client";
 
-import { clearSensitiveData, encryptCardData, getPublicKey, prepareCardData, validatePagSeguroSDK } from '@/utils/encryptionHelper';
+import { encryptCard } from '@/utils/encryption-helper';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { paymentCardSchema, TPaymentCardSchema } from '@/validation/zod-schemas/payment-card-schema';
@@ -11,7 +11,7 @@ import { formatCardNumber } from '@/utils/format-card-number';
 import { detectCardBrand } from '@/utils/detect-card-brand';
 import 'react-credit-cards-2/dist/es/styles-compiled.css'
 import { usePathname, useRouter } from 'next/navigation';
-import { useCheckout } from '@/hooks/zustand/use-checkout';
+import { usePaymentMethods } from '@/hooks/zustand/use-payment-methods';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useClassData } from '@/hooks/use-class-data';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -19,16 +19,21 @@ import { Spinner } from '@/components/ui/spinner';
 import React, { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useForm } from 'react-hook-form';;
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
 import SuccessAnimation from '@/components/animations/success-animation';
 import { processCreditCardPayment } from '@/actions/server/payment/process-credit-card-payment';
+import { fieldError } from '@/constants/code-field-map';
+import { useCheckoutSteps } from '@/hooks/zustand/use-checkout-steps';
+import useCreditCardData from '@/hooks/zustand/use-credit-card';
+import { useSyncFormWithStore } from '@/hooks/use-sync-form-with-store';
+import { PersonalDataFormSchema, personalDataFormSchema } from '@/validation/zod-schemas/personal-data-form-schema';
 
 const Cards = dynamic(() => import('react-credit-cards-2'), {
   ssr: false, // renderiza direto no cliente
   loading: () => (
-    <div className="flex items-center justify-center min-w-[290px] min-h-[182.26px]">
+    <div className="flex items-center justify-center min-w-72.5 min-h-[182.26px]">
       <Spinner />
     </div>
   )
@@ -37,23 +42,38 @@ const Cards = dynamic(() => import('react-credit-cards-2'), {
 const CreditCardForm = React.memo(function CreditCardForm() {
 
   const [focused, setFocused] = useState<'number' | 'expiry' | 'cvc' | 'name' | undefined>();
-
   const [paymentAccepted, setPaymentAccepted] = useState(false);
 
-  const { setInstallments, installments: currentInstallments } = useCheckout();
+  const { classData } = useClassData();
+
+  const personalData = usePersonalData(state => state.personalData);
+
+  const creditCardData = useCreditCardData(state => state.creditCardData);
+  const updateField = useCreditCardData(state => state.updateCreditCardDataField);
+  const resetCreditCardData = useCreditCardData(state => state.resetCreditCardData);
+  
+  const goToStep = useCheckoutSteps((state) => state.goToStep);
+  const setPendingErrors = useCheckoutSteps(state => state.setPendingErrors);
+
+  const currentInstallments = usePaymentMethods(state => state.installments);
+  const setInstallments = usePaymentMethods(state => state.setInstallments);
 
   const form = useForm<TPaymentCardSchema>({
     resolver: zodResolver(paymentCardSchema),
-    defaultValues: {
-      holderName: 'PEDRO LUCAS ALMEIDA CUNHA',
-      cardNumber: '4539620659922097',
-      cvv: '123',
-      expiryDate: '12/30',
-      installments: currentInstallments,
-      acceptPolicy: true,
-      acceptContract: true
-    }
+    defaultValues: creditCardData
+      ? creditCardData
+      : {
+        holderName: '',
+        cardNumber: '',
+        cvv: '',
+        expirationDate: '',
+        installments: 12,
+        acceptPolicy: false,
+        acceptContract: false
+      }
   });
+
+  useSyncFormWithStore(form.watch, updateField);
 
   // memoização de cálculos caros
   const installmentOptions = useMemo(() =>
@@ -68,59 +88,68 @@ const CreditCardForm = React.memo(function CreditCardForm() {
   }, [watchedCardNumber]);
 
   const router = useRouter();
-
   const pathname = usePathname();
-
-  const personalData = usePersonalData(state => state.personalData);
-
-  if (!personalData) throw new Error("Dados pessoais não recebidos");
-
-  const { classData } = useClassData();
 
   const handleCreditCardFormSubmit = async (creditCardData: TPaymentCardSchema,) => {
     try {
-      validatePagSeguroSDK();
-      const publicKey = getPublicKey();
-      const cardData = prepareCardData(creditCardData);
-      const encryptedCardToken = encryptCardData(publicKey, cardData);
+      const preRegistration = await createPreRegistration({
+        personalData: personalData as PersonalDataFormSchema,
+        classId: classData.id
+      });
 
-      // limpa dados sensíveis da cardData
-      cardData.number = '';
-      cardData.securityCode = '';
+      if (!preRegistration.success) {
+        if (preRegistration.code === 'invalid_data') {
 
-      // limpa dados sensíveis vindos do formulário
-      clearSensitiveData(creditCardData);
+          setPendingErrors(preRegistration.errors);
 
-      const preRegistration = await createPreRegistration({ personalData, classId: classData.id });
-
-      if (!preRegistration.success || !preRegistration.id) {
+          goToStep(1);
+        }
         throw new Error(
-          (preRegistration.code === 'internal_error' || !preRegistration.message) ?
-            "Ocorreu um erro. Contate o suporte ou tente novamente mais tarde." :
-            preRegistration.message
+          preRegistration.message || 'Ocorreu um erro interno ao criar seu registro'
         );
+      }
+
+      const result = encryptCard(creditCardData);
+
+      if (result.hasErrors) {
+        result.errors.forEach((error) => {
+          const field = fieldError[error.code];
+          form.setError(field.name, {
+            type: 'manual',
+            message: field.message
+          })
+        })
+        return;
       }
 
       const res = await processCreditCardPayment({
         preRegistrationId: preRegistration.id,
         classData: classData,
         installments: creditCardData.installments,
-        creditCardToken: encryptedCardToken
+        cardToken: result.encryptedCard
       });
 
-      if (!res.success) throw new Error(
-        "Ocorreu um erro ao processar o pagamento"
-      );
+      if (!res.success) throw new Error(res.message);
 
       setPaymentAccepted(true);
+      resetCreditCardData();
+      form.reset({
+        holderName: '',
+        cardNumber: '',
+        cvv: '',
+        expirationDate: '',
+        installments: currentInstallments
+      });
 
-      // TODO: TROCAR POR .replace
-      setTimeout(() => router.push(`${pathname}/success`), 1500);
+      setTimeout(() => router.replace(`${pathname}/success`), 1500);
 
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erro ao processar pagamento. Tente novamente mais tarde', {
-        position: 'top-center'
-      });
+      toast.error(
+        error instanceof Error
+          ? error.message || 'Ocorreu um erro ao processar o pagamento.'
+          : 'Erro ao processar pagamento. Tente novamente mais tarde',
+        { position: 'top-center' }
+      );
     }
   }
 
@@ -147,8 +176,8 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                     render={({ field }) => (
                       <FormItem className='gap-1!'>
                         <FormLabel className='text-gray-700'>Número do cartão</FormLabel>
-                        <FormControl>
-                          <div className="relative">
+                        <div className="relative">
+                          <FormControl>
                             <Input
                               {...field}
                               placeholder="0000 0000 0000 0000"
@@ -156,15 +185,16 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                               onChange={(e) => field.onChange(formatCardNumber(e.target.value))}
                               onFocus={() => setFocused('number')}
                               onBlur={() => setFocused(undefined)}
-                              className="pr-16"
+                              className="pr-16 selection:bg-sky-500 selection:text-white"
+                              disabled={paymentAccepted}
                             />
-                            {cardBrand && (
-                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center">
-                                {cardBrand}
-                              </div>
-                            )}
-                          </div>
-                        </FormControl>
+                          </FormControl>
+                          {cardBrand && (
+                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center">
+                              {cardBrand}
+                            </div>
+                          )}
+                        </div>
                         <FormMessage className='text-xs mb-2' />
                       </FormItem>
                     )}
@@ -174,7 +204,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
-                      name="expiryDate"
+                      name="expirationDate"
                       render={({ field }) => (
                         <FormItem className='gap-1!'>
                           <FormLabel className='text-gray-700'>Validade</FormLabel>
@@ -193,6 +223,8 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                               }}
                               onFocus={() => setFocused('expiry')}
                               onBlur={() => setFocused(undefined)}
+                              className="selection:bg-sky-500 selection:text-white"
+                              disabled={paymentAccepted}
                             />
                           </FormControl>
                           <FormMessage className='text-xs mb-2' />
@@ -214,6 +246,8 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                               onChange={(e) => field.onChange(e.target.value.replace(/\D/g, ''))}
                               onFocus={() => setFocused('cvc')}
                               onBlur={() => setFocused(undefined)}
+                              className="selection:bg-sky-500 selection:text-white"
+                              disabled={paymentAccepted}
                             />
                           </FormControl>
                           <FormMessage className='text-xs mb-2' />
@@ -236,6 +270,8 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                             onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                             onFocus={() => setFocused('name')}
                             onBlur={() => setFocused(undefined)}
+                            className="selection:bg-sky-500 selection:text-white"
+                            disabled={paymentAccepted}
                           />
                         </FormControl>
                         <FormMessage className='text-xs mb-2' />
@@ -258,6 +294,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                               setInstallments(installments, classData.registration_fee);
                             }}
                             value={field.value?.toString() || '1'}
+                            disabled={paymentAccepted}
                           >
                             <SelectTrigger className="w-full">
                               <SelectValue />
@@ -280,15 +317,15 @@ const CreditCardForm = React.memo(function CreditCardForm() {
 
                 <div className='border-l border-gray-300 mx-6 h-75'></div>
 
-                <div className='flex flex-col justify-between pb-8 max-w-[290px] w-1/2 space-y-5'>
-                  <div className="relative min-h-[180px] max-h-[180px]">
+                <div className='flex flex-col justify-between pb-8 max-w-72.5 w-1/2 space-y-5'>
+                  <div className="relative min-h-45 max-h-45">
                     {paymentAccepted
                       ?
                       <SuccessAnimation />
                       :
                       <Cards
                         number={watchedCardNumber}
-                        expiry={form.watch('expiryDate')}
+                        expiry={form.watch('expirationDate')}
                         cvc={form.watch('cvv')}
                         name={form.watch('holderName')}
                         focused={focused}
@@ -309,6 +346,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                             onCheckedChange={field.onChange}
                             variant="custom"
                             className="m-0 cursor-pointer"
+                            disabled={paymentAccepted}
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
@@ -335,6 +373,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                             onCheckedChange={field.onChange}
                             variant="custom"
                             className="m-0 cursor-pointer"
+                            disabled={paymentAccepted}
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
@@ -354,7 +393,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
               <Button
                 type="submit"
                 className="w-full bg-green-600 hover:bg-green-700 cursor-pointer"
-                disabled={form.formState.isSubmitting}
+                disabled={form.formState.isSubmitting || paymentAccepted}
               >
                 {form.formState.isSubmitting ? <><Spinner />Processando</> : 'Finalizar pedido'}
               </Button>

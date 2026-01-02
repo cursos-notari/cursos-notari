@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { PayMethod } from "@/types/enum/payment-method";
 
-interface CheckoutStore {
-  installments: number;
+interface PaymentMethodsStore {
+  installments: number; 
   installmentsPrice: number | null;
   paymentMethod: PayMethod;
   lastCreditCardInstallments: number;
@@ -10,7 +10,7 @@ interface CheckoutStore {
   setPaymentMethod: (method: PayMethod, totalPrice: number) => void;
 }
 
-export const useCheckout = create<CheckoutStore>((set, get) => ({
+export const usePaymentMethods = create<PaymentMethodsStore>((set, get) => ({
   installments: 12,
   installmentsPrice: null,
   paymentMethod: PayMethod.CREDIT_CARD,

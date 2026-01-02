@@ -8,38 +8,37 @@ export const getAddressByCEP = async (cep: string) => {
       signal: AbortSignal.timeout(5000),
     });
 
-    if (!response.ok) throw new Error('CEP não encontrado');
+    if (!response.ok) return null;
 
     const data: ViaCEPResponse = await response.json();
 
-    if ('erro' in data) throw new Error('CEP não encontrado');
+    if ('erro' in data) throw new Error();
 
     if (data.uf !== 'SP') throw new Error('CEP inválido');
 
     return data;
 
   } catch (error) {
-    // Verifica se é erro de timeout
+
     if (error instanceof Error && error.name === 'TimeoutError') {
-      throw new Error('CEP não encontrado');
+      return null;
     }
 
-    // Se o erro for de CEP fora de SP, não tenta a BrasilAPI
+    // se o erro for de CEP fora de SP, não tenta a BrasilAPI
     if (error instanceof Error && error.message === 'CEP inválido') {
       throw error;
     }
 
-    // Tenta a BrasilAPI apenas se não foi erro de UF
     try {
       const response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`, {
         signal: AbortSignal.timeout(3000),
       });
 
-      if (!response.ok) throw new Error('CEP não encontrado');
+      if (!response.ok) return null;
 
       const data: BrasilAPIResponse = await response.json();
 
-      if ('errors' in data) throw new Error('CEP não encontrado');
+      if ('errors' in data) return null
 
       if (data.state !== 'SP') throw new Error('CEP inválido');
 
@@ -50,12 +49,12 @@ export const getAddressByCEP = async (cep: string) => {
         uf: data.state,
       };
     } catch (brasilApiError) {
-      // Verifica se é erro de timeout na BrasilAPI
+      
       if (brasilApiError instanceof Error && brasilApiError.name === 'TimeoutError') {
-        throw new Error('CEP não encontrado');
+        return null
       }
-      // Lança o erro da BrasilAPI
-      throw brasilApiError;
+      
+      return null
     }
   }
 };

@@ -31,13 +31,13 @@ interface PaymentRawData {
 // interface para o objeto aninhado 'paymentResponse'
 interface PaymentResponse {
   // código pagbank que indica o motivo da resposta.
-  code: number;
+  code: string;
   // mensagem amigável (ex: sucesso).
   message: string;
   // nsu da autorização.
   reference?: string;
   // informações puras vindas dos emissores/bandeiras
-  rawData?: PaymentRawData;
+  raw_data?: PaymentRawData;
 }
 
 // interface para o objeto aninhado 'card'

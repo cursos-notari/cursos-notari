@@ -20,12 +20,15 @@ import { Combobox } from '@/components/ui/combobox'
 import { getCitiesByUF } from '@/services/get-cities-by-uf'
 import usePersonalData from '@/hooks/zustand/use-personal-data'
 import { useSyncFormWithStore } from '@/hooks/use-sync-form-with-store'
+import { useCheckoutSteps } from '@/hooks/zustand/use-checkout-steps'
 
 export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
 
   const personalData = usePersonalData((state) => state.personalData);
-  
-  const setPersonalData = usePersonalData((state) => state.setPersonalData);
+
+  const updateField = usePersonalData((state) => state.updatePersonalDataField);
+  const pendingErrors = useCheckoutSteps((state) => state.pendingErrors);
+  const setPendingErrors = useCheckoutSteps((state) => state.setPendingErrors);
 
   const form = useForm<PersonalDataFormSchema>({
     resolver: zodResolver(personalDataFormSchema),
@@ -51,7 +54,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
       postalCode: '',
     },
     mode: 'onChange'
-  })
+  });
 
   const cep = form.watch('postalCode');
 
@@ -87,12 +90,12 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
   useEffect(() => {
 
     if (!address) return;
-    
+
     form.reset({ ...form.getValues(), ...address });
-    
+
   }, [address]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (addressError && cep.length === 8) {
       form.setError('postalCode', {
         type: 'manual',
@@ -103,24 +106,40 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
     }
   }, [addressError, cep, form]);
 
-  useSyncFormWithStore(form.watch);
+  useEffect(() => {
+    if (pendingErrors && pendingErrors.length > 0) {
+      pendingErrors.forEach((error) => {
+        form.setError(error.field, {
+          type: 'manual',
+          message: error.message
+        });
+      });
 
-  const handleSubmit = async (data: PersonalDataFormSchema) => {
-    setPersonalData(data);
-    onNext();
-  }
+      const firstErrorField = pendingErrors[0]?.field;
+      if (firstErrorField) {
+        // aguarda a renderização completa e o scroll
+        setTimeout(() => {
+          form.setFocus(firstErrorField);
+
+        }, 100); // 100ms para garantir que o DOM está pronto
+      }
+
+      setPendingErrors(null);
+    }
+  }, [pendingErrors, form, setPendingErrors]);
+
+  useSyncFormWithStore(form.watch, updateField);
 
   return (
     <Card className="w-full rounded-none border-t-0 max-w-2xl mx-auto">
       <CardHeader>
-        {/* <CardTitle className='text-linear bg-linear-to-tr linear-colors text-2xl'>Inscrição - {classData.name}</CardTitle> */}
         <CardDescription className='text-sm text-center font-normal'>
           Confirme seus dados. Eles aparecerão em sua nota fiscal.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(() => onNext())} className="space-y-6">
             {/* fieldset para informações pessoais */}
             <fieldset className="border border-gray-200 p-6 rounded-md space-y-4">
               <legend className="text-lg font-semibold text-linear bg-linear-to-tr linear-colors px-3">Informações Pessoais</legend>
@@ -138,7 +157,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -155,7 +174,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -187,7 +206,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                         <FormDescription className={`text-xs ${isAgeError ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
                           *Você deve ter pelo menos 17 anos para se cadastrar
                         </FormDescription>
-                        {!isAgeError && <FormMessage />}
+                        {!isAgeError && <FormMessage className='text-xs' />}
                       </FormItem>
                     );
                   }}
@@ -203,16 +222,15 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                       <FormControl>
                         <Input className='selection:bg-sky-500'
                           placeholder="000.000.000-00"
-                          {...field}
+                          value={formatCPF(field.value)}
                           onChange={(e) => {
-
-                            const formatted = formatCPF(e.target.value)
-                            field.onChange(formatted)
+                            const unformatted = e.target.value.replace(/\D/g, '')
+                            field.onChange(unformatted)
                           }}
                           maxLength={14}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -230,15 +248,15 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                       <FormControl>
                         <Input className='selection:bg-sky-500'
                           placeholder="(11) 99999-9999"
-                          {...field}
+                          value={formatPhone(field.value)}
                           onChange={(e) => {
-                            const formatted = formatPhone(e.target.value)
-                            field.onChange(formatted)
+                            const unformatted = e.target.value.replace(/\D/g, '');
+                            field.onChange(unformatted);
                           }}
                           maxLength={15}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -260,7 +278,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                           }}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -291,7 +309,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                           maxLength={9}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -309,7 +327,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -345,7 +363,10 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                                   checked={field.value}
                                   onCheckedChange={(checked) => {
                                     field.onChange(checked)
-                                    if (checked) form.setValue('number', '')
+                                    if (checked) {
+                                      form.setValue('number', '')
+                                      form.clearErrors('number')
+                                    }
                                   }}
                                   variant="custom"
                                   className="cursor-pointer"
@@ -359,7 +380,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                             </FormItem>
                           )}
                         />
-                        <FormMessage />
+                        <FormMessage className='text-xs' />
                       </FormItem>
                     )}
                   />
@@ -377,7 +398,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -401,7 +422,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                           }}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -422,7 +443,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                           onChange={() => { }} // previne qualquer mudança
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -430,7 +451,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                 <FormField
                   control={form.control}
                   name="city"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Cidade*</FormLabel>
                       <FormControl>
@@ -441,7 +462,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                         ) : citiesItems ? (
                           <Combobox
                             disabled={isFetchingAddress}
-                            className='w-full cursor-pointer font-normal hover:text-gray-600'
+                            className={`w-full cursor-pointer font-normal hover:text-gray-600 ${fieldState.error ? 'border-red-500' : ''}`}
                             comboboxPlaceholder='Selecione a cidade'
                             searchOptionPlaceholder='Busque a cidade'
                             items={citiesItems}
@@ -450,7 +471,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                           />
                         ) : null}
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className='text-xs' />
                     </FormItem>
                   )}
                 />
@@ -479,7 +500,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
               type="submit"
               variant='personalized'
               className='w-full'
-              disabled={form.formState.isSubmitting|| isFetchingAddress}
+              disabled={form.formState.isSubmitting || isFetchingAddress}
             >
               {form.formState.isSubmitting ? <Loader2Icon className='animate-spin' /> : 'Avançar'}
             </Button>

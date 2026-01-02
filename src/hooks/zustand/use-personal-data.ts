@@ -1,11 +1,11 @@
 import { create } from "zustand";
 import { PersonalDataFormSchema } from "@/validation/zod-schemas/personal-data-form-schema";
-import { defaultValuesMock } from "@/mocks/personal-data-mock";
+import { EMPTY_PERSONAL_DATA_MOCK, PERSONAL_DATA_MOCK } from "@/mocks/personal-data-mock";
 import { immer } from 'zustand/middleware/immer';
 
 interface PersonalDataStore {
-  personalData: PersonalDataFormSchema | null;
-  setPersonalData: (data: PersonalDataFormSchema) => void;
+  personalData: Partial<PersonalDataFormSchema>;
+  setPersonalData: (data: Partial<PersonalDataFormSchema>) => void;
   updatePersonalDataField: <K extends keyof PersonalDataFormSchema>(
     field: K,
     value: PersonalDataFormSchema[K]
@@ -15,7 +15,7 @@ interface PersonalDataStore {
 
 const usePersonalData = create<PersonalDataStore>()(
   immer((set) => ({
-    personalData: defaultValuesMock,
+    personalData: PERSONAL_DATA_MOCK,
 
     setPersonalData: (data) =>
       set((state) => {
@@ -31,7 +31,7 @@ const usePersonalData = create<PersonalDataStore>()(
 
     resetPersonalData: () =>
       set((state) => {
-        state.personalData = defaultValuesMock;
+        state.personalData = EMPTY_PERSONAL_DATA_MOCK;
       }),
   }))
 );

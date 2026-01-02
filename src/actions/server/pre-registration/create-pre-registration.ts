@@ -9,28 +9,27 @@ export interface CreatePreRegistrationParams {
   classId: string
 }
 
-interface CreatePreRegistrationReturn {
-  success: boolean;
-  message?: string;
-  code?: string;
-  id?: string;
-}
-
-export async function createPreRegistration({ classId, personalData }: CreatePreRegistrationParams): Promise<CreatePreRegistrationReturn> {
+export async function createPreRegistration({ classId, personalData }: CreatePreRegistrationParams) {
 
   const isValidData = personalDataFormSchema.safeParse(personalData);
 
   if (!isValidData.success) {
+    const formattedErrors = isValidData.error.issues.map((issue) => ({
+      field: issue.path.join('.') as keyof PersonalDataFormSchema,
+      message: issue.message
+    }));
+
     return {
       success: false,
-      message: 'Dados inválidos',
-      code: 'validation_error'
+      message: 'Dados inválidos, verifique suas informações e tente novamente.',
+      errors: formattedErrors,
+      code: 'invalid_data'
     }
   }
 
   const supabase = createServiceClient();
 
-  if (!supabase) return { success: false }
+  if (!supabase) return { success: false };
 
   const { data: result, error } = await supabase.rpc("create_pre_registration", {
     p_class_id: classId,
@@ -51,17 +50,19 @@ export async function createPreRegistration({ classId, personalData }: CreatePre
 
   if (error) {
     console.error("Erro na RPC create_pre_registration:", error);
-    return {
-      success: false,
-    }
+    return { success: false };
   }
 
   if (!result.success) {
-    console.error(`${result.code} : ${result.message}`);
+    const { code, message } = result;
+
+    if (code === 'internal_error') {
+      console.error(`${code} : ${message}`);
+    }
+
     return {
       success: false,
-      message: result.message,
-      code: result.code
+      message: code === 'internal_error' ? null : message
     }
   }
 

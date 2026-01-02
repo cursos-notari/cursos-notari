@@ -15,21 +15,24 @@ export async function getPreRegistrationById(id: string): Promise<GetPreRegistra
   
   const supabase = createServiceClient();
 
-  if (!supabase) return { 
-    success: false
-  }
+  if (!supabase) return { success: false };
 
   const { data, error } = await supabase.rpc('get_pre_registration_by_id', { p_id: id });
 
   if (error) {
-    console.error('Erro ao executar função get_pre_registration_by_token:', error);
-    return {
-      success: false,
-    };
+    console.error('Erro ao executar função get_pre_registration_by_id:', error);
+    return { success: false };
   }
 
   if (!data.success) {
-    console.error(`Erro ao buscar pré-registro:`, data.message);
+
+    const { code, message } = data;
+
+    if (code === 'internal_error') {
+      console.error(`${code} : ${message}`);
+    }
+
+    return { success: false };
   }
 
   return data;
