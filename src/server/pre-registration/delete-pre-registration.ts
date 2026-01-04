@@ -1,9 +1,9 @@
 'use server'
 
-import { createServiceClient  } from "@/supabase/service-client";
+import { createClient  } from "@/lib/supabase/server";
 
 export async function deletePreRegistrationById(preRegistrationId: string) {
-  const supabase = createServiceClient();
+  const supabase = await createClient();
 
   if(!supabase) return { success: false }
 

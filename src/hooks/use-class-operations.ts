@@ -2,9 +2,9 @@
 
 import { useCallback, useTransition } from 'react'
 import { toast } from 'sonner'
-import { deleteClassAction } from '@/actions/server/class/delete-class'
-import { createClassAction } from '@/actions/server/class/create-class'
-import { updateClassAction } from '@/actions/server/class/update-class'
+import { deleteClassAction } from '@/server/class/delete-class'
+import { createClassAction } from '@/server/class/create-class'
+import { updateClassAction } from '@/server/class/update-class'
 import { Class } from '@/types/interfaces/database/class'
 import { TransformedCreateClassFormData } from '@/validation/zod-schemas/create-class-schema'
 import { TransformedUpdateClassFormData } from '@/validation/zod-schemas/update-class-schema'

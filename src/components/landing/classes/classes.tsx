@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { getOpenClasses } from '@/actions/server/class/get-open-classes';
+import { getOpenClasses } from '@/server/class/get-open-classes';
 import PublicClassCard from './public-class-card';
 import NoClasses from './no-classes';
 import PublicClassCardSkeleton from '@/components/skeletons/public-class-card-skeleton';

@@ -1,6 +1,6 @@
 'use server'
 
-import { createServiceClient } from "@/supabase/service-client";
+import { createClient } from "@/lib/supabase/server";
 import { PersonalDataFormSchema, personalDataFormSchema } from "@/validation/zod-schemas/personal-data-form-schema";
 import { cookies } from "next/headers";
 
@@ -27,7 +27,7 @@ export async function createPreRegistration({ classId, personalData }: CreatePre
     }
   }
 
-  const supabase = createServiceClient();
+  const supabase = await createClient();
 
   if (!supabase) return { success: false };
 

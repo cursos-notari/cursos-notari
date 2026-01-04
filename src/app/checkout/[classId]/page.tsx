@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getClassById } from "@/actions/server/class/get-class-by-id";
+import { getClassById } from "@/server/class/get-class-by-id";
 import OrderReview from "@/components/checkout/order-review";
 import CheckoutSteps from "./checkout-steps";
 import Image from "next/image";

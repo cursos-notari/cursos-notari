@@ -1,4 +1,4 @@
-import { getPreRegistrationById } from '@/actions/server/pre-registration/get-pre-registration-by-id';
+import { getPreRegistrationById } from '@/server/pre-registration/get-pre-registration-by-id';
 import { setTimeout } from 'node:timers/promises';
 import { cookies } from 'next/headers'
 import { Suspense } from 'react'

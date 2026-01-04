@@ -2,7 +2,7 @@
 
 import { PublicClass } from "@/types/interfaces/database/class";
 import { Order } from "@/types/interfaces/payment/pagbank/order";
-import { createServiceClient } from "@/supabase/service-client";
+import { createClient } from "@/lib/supabase/server";
 import { PreRegistration } from "@/types/interfaces/database/pre-registration";
 
 // o qrcode é válido por 1 hora
@@ -71,7 +71,7 @@ export async function createPagBankOrder({
 
     const order: Order = await response.json();
 
-    const supabase = createServiceClient();
+    const supabase = await createClient();
 
     if (!supabase) return { success: false };
 

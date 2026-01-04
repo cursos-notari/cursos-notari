@@ -1,7 +1,7 @@
 'use server'
 import 'server-only';
 
-import { createServiceClient } from "@/supabase/service-client";
+import { createClient } from "@/lib/supabase/server";
 import { Order } from '@/types/interfaces/payment/pagbank/order';
 
 export interface ConfirmPaymentResult {
@@ -19,7 +19,7 @@ export async function confirmPayment({
   order: Order;
 }): Promise<ConfirmPaymentResult> {
   
-  const supabase = createServiceClient();
+  const supabase = await createClient();
 
   if (!supabase) { return { success: false } }
 

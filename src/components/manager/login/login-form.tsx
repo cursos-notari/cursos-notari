@@ -1,6 +1,6 @@
 'use client'
 
-import { supabase } from "@/supabase/browser-client"
+import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import React, { useState } from "react"
 import { useForm } from "react-hook-form"
@@ -22,7 +22,10 @@ export function LoginForm() {
   });
 
   const handleLoginFormSubmit = async (data: TLoginFormSchema) => {
+    
     setIsLoading(true);
+
+    const supabase = createClient();
 
     const { error } = await supabase.auth.signInWithPassword({
       email: data.email,

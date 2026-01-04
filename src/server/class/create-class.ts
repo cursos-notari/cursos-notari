@@ -1,10 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache';
-import { createClient } from '@/supabase/server-client';
+import { createClient } from '@/lib/supabase/server';
 import { TransformedCreateClassFormData } from '@/validation/zod-schemas/create-class-schema';
 
 export async function createClassAction(classData: TransformedCreateClassFormData) {
+  
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();

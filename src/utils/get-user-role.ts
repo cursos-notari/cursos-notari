@@ -1,9 +1,13 @@
-import { supabase } from '@/supabase/browser-client'
+import { createClient } from '@/lib/supabase/client'
 import type { RoleType } from '@/types/interfaces/database/role-type'
 
 export async function getUserRole(): Promise<RoleType | null> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) return null;
 
   const { data, error } = await supabase
     .from('profiles')
@@ -11,6 +15,7 @@ export async function getUserRole(): Promise<RoleType | null> {
     .eq('id', user.id)
     .single()
 
-  if (error) return null
-  return data.role as RoleType
+  if (error) return null;
+  
+  return data.role as RoleType;
 }

@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/supabase/server-client'
+import { createClient } from '@/lib/supabase/server'
 import { TransformedUpdateClassFormData } from '@/validation/zod-schemas/update-class-schema'
 import { revalidatePath } from 'next/cache'
 

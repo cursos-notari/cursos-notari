@@ -1,10 +1,10 @@
 'use client'
 
-import { createPreRegistration } from '@/actions/server/pre-registration/create-pre-registration'
+import { createPreRegistration } from '@/server/pre-registration/create-pre-registration'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { pixFormSchema, PixFormSchema } from '@/validation/zod-schemas/pix-form-validation'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
-import { processPixPayment } from '@/actions/server/payment/process-pix-payment'
+import { processPixPayment } from '@/server/payment/process-pix-payment'
 import usePersonalData from '@/hooks/zustand/use-personal-data'
 import { useClassData } from '@/hooks/use-class-data'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -18,6 +18,7 @@ import { toast } from 'sonner'
 import { useCheckoutSteps } from '@/hooks/zustand/use-checkout-steps'
 import usePixData from '@/hooks/zustand/use-pix-data'
 import { useSyncFormWithStore } from '@/hooks/use-sync-form-with-store'
+import { PersonalDataFormSchema } from '@/validation/zod-schemas/personal-data-form-schema'
 
 export default function PixForm() {
 
@@ -55,7 +56,7 @@ export default function PixForm() {
     try {
       const preRegistration = await createPreRegistration({
         classId: classData.id,
-        personalData
+        personalData: personalData as PersonalDataFormSchema
       });
 
       if (!preRegistration.success) {

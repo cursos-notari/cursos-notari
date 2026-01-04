@@ -4,6 +4,7 @@ import { Class } from "@/types/interfaces/database/class";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export async function getAllClassesWithSchedules(supabase: SupabaseClient): Promise<Class[]> {
+  
   const { data, error } = await supabase.rpc('get_all_classes_with_schedules');
 
   if (error) {
