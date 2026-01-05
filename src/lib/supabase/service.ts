@@ -1,19 +1,24 @@
 import 'server-only';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
 
 // esta função cria o cliente de acesso irrestrito
 export function createClient() {
-  if (!supabaseUrl || !supabaseSecretKey) {
-    console.error('Variáveis de ambiente não encontradas');
-    return false
+
+  if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
+    console.error(`
+      Variáveis de ambiente não definidas:\n
+      SUPABASE_URL: ${SUPABASE_URL}\n
+      SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY}
+    `);
+    return false;
   }
 
   return createServiceClient(
-    supabaseUrl,
-    supabaseSecretKey,
+    SUPABASE_URL,
+    SUPABASE_SECRET_KEY,
     {
       auth: {
         persistSession: false,

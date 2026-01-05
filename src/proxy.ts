@@ -5,7 +5,16 @@ import { updateSession } from "./lib/supabase/proxy";
 export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
-  const { supabaseResponse, user } = await updateSession(req);
+  const result = await updateSession(req);
+  
+  if (result === false) {
+    return NextResponse.json(
+      { error: "Erro de configuração do servidor" },
+      { status: 500 }
+    );
+  }
+
+  const { supabaseResponse, user } = result;
 
   if (user) {
     

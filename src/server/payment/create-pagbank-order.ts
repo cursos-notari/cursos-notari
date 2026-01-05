@@ -2,7 +2,7 @@
 
 import { PublicClass } from "@/types/interfaces/database/class";
 import { Order } from "@/types/interfaces/payment/pagbank/order";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/service";
 import { PreRegistration } from "@/types/interfaces/database/pre-registration";
 
 // o qrcode é válido por 1 hora
@@ -71,22 +71,30 @@ export async function createPagBankOrder({
 
     const order: Order = await response.json();
 
-    const supabase = await createClient();
+    const supabase = createClient();
 
     if (!supabase) return { success: false };
 
     // salva os dados do pedido no banco de dados
-    const { error: updateError } = await supabase
+    const { data, error: updateError } = await supabase
       .from('pre_registrations')
       .update({
         pagbank_order_id: order.id,
         pagbank_order_data: order,
         pagbank_order_created_at: order.created_at
       })
-      .eq('id', preRegistrationData.id);
+      .eq('id', preRegistrationData.id)
+      .select()
+    ;
 
     if (updateError) {
       console.error("Erro ao salvar o pedido no banco:", updateError);
+      return { success: false };
+    }
+
+    if (!data || data.length === 0) {
+      console.error("Nenhum registro foi atualizado. Possível bloqueio por RLS.");
+      return { success: false };
     }
 
     return {
