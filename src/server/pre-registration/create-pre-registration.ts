@@ -1,6 +1,6 @@
 'use server'
 
-import { createServiceClient } from "@/supabase/service-client";
+import { createClient } from "@/lib/supabase/service";
 import { PersonalDataFormSchema, personalDataFormSchema } from "@/validation/zod-schemas/personal-data-form-schema";
 import { cookies } from "next/headers";
 
@@ -27,7 +27,7 @@ export async function createPreRegistration({ classId, personalData }: CreatePre
     }
   }
 
-  const supabase = createServiceClient();
+  const supabase = createClient();
 
   if (!supabase) return { success: false };
 
@@ -49,20 +49,22 @@ export async function createPreRegistration({ classId, personalData }: CreatePre
   });
 
   if (error) {
-    console.error("Erro na RPC create_pre_registration:", error);
+    console.error("Erro ao chamar RPC create_pre_registration:", error);
     return { success: false };
   }
 
   if (!result.success) {
     const { code, message } = result;
 
-    if (code === 'internal_error') {
-      console.error(`${code} : ${message}`);
+    const isInternalError = code === 'internal_error';
+
+    if (isInternalError) {
+      console.error(`Ocorreu um erro interno ao criar o pré-registro: ${message}`);
     }
 
     return {
       success: false,
-      message: code === 'internal_error' ? null : message
+      message: isInternalError ? null : message
     }
   }
 

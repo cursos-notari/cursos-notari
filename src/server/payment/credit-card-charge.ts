@@ -140,7 +140,7 @@ export async function creditCardCharge({
         const status = axiosError.response.status;
         const data = axiosError.response.data as any;
 
-        console.error('Erro na resposta:', { status, data });
+        console.error('Erro ao chamar API do PagBank:', { status, data });
 
         // Status 402: Pagamento recusado - pode ter payment_response com código específico
         if (status === 402) {

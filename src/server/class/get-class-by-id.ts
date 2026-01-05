@@ -3,7 +3,7 @@
 import { cache } from "react";
 import { PublicClass } from "@/types/interfaces/database/class";
 import { cacheLife } from "next/cache";
-import { createServiceClient } from "@/supabase/service-client";
+import { createClient } from "@/lib/supabase/service";
 import { PostgrestError } from "@supabase/supabase-js";
 
 interface GetClassByIdReturn {
@@ -18,7 +18,7 @@ export const getClassById = cache(async (classId: string): Promise<GetClassByIdR
 
   cacheLife('seconds');
 
-  const supabase = createServiceClient();
+  const supabase = await createClient();
 
   if(!supabase) return { 
     success: false,

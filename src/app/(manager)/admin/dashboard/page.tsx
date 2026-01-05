@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import Dashboard from "./dashboard";
-import { getAllClassesWithSchedules } from "@/actions/server/class/get-all-classes-with-schedules";
-import { createClient } from "@/supabase/server-client";
+import { getAllClassesWithSchedules } from "@/server/class/get-all-classes-with-schedules";
+import { createClient } from "@/lib/supabase/server";
 import { DashboardSkeleton } from '@/components/skeletons';
 import { Metadata } from 'next';
 

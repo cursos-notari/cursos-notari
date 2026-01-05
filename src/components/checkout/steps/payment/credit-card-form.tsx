@@ -4,7 +4,7 @@ import { encryptCard } from '@/utils/encryption-helper';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { paymentCardSchema, TPaymentCardSchema } from '@/validation/zod-schemas/payment-card-schema';
-import { createPreRegistration } from '@/actions/server/pre-registration/create-pre-registration';
+import { createPreRegistration } from '@/server/pre-registration/create-pre-registration';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import usePersonalData from '@/hooks/zustand/use-personal-data';
 import { formatCardNumber } from '@/utils/format-card-number';
@@ -22,13 +22,14 @@ import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
-import SuccessAnimation from '@/components/animations/success-animation';
-import { processCreditCardPayment } from '@/actions/server/payment/process-credit-card-payment';
+import SuccessAnimation from '@/components/animations/payment-accepted';
+import { processPixPayment } from '@/server/payment/process-pix-payment';
 import { fieldError } from '@/constants/code-field-map';
 import { useCheckoutSteps } from '@/hooks/zustand/use-checkout-steps';
 import useCreditCardData from '@/hooks/zustand/use-credit-card';
 import { useSyncFormWithStore } from '@/hooks/use-sync-form-with-store';
 import { PersonalDataFormSchema, personalDataFormSchema } from '@/validation/zod-schemas/personal-data-form-schema';
+import { processCreditCardPayment } from '@/server/payment/process-credit-card-payment';
 
 const Cards = dynamic(() => import('react-credit-cards-2'), {
   ssr: false, // renderiza direto no cliente

@@ -1,20 +1,18 @@
-'use server'
+"use server"
 
-import { createServiceClient } from "@/supabase/service-client";
-import { PublicClass } from "@/types/interfaces/database/class";
-import { cacheLife } from "next/cache";
 import { cache } from "react";
+import { cacheLife } from "next/cache";
+import { PublicClass } from "@/types/interfaces/database/class";
+import { createClient } from "@/lib/supabase/service";
 
 export const getOpenClasses = cache(async (): Promise<PublicClass[]> => {
   "use cache"
 
-  cacheLife("seconds")
+  cacheLife("seconds");
 
-  const supabase = createServiceClient();
+  const supabase = await createClient();
 
   if (!supabase) return [];
-
-  console.log('buscou');
 
   const { data, error } = await supabase
     .from('open_classes')

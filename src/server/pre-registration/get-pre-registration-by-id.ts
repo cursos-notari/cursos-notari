@@ -1,7 +1,7 @@
 'use server'
 import 'server-only'
 
-import { createServiceClient } from '@/supabase/service-client';
+import { createClient } from '@/lib/supabase/service';
 import { PreRegistration } from '@/types/interfaces/database/pre-registration';
 
 export interface GetPreRegistrationByIdResponse {
@@ -13,7 +13,7 @@ export interface GetPreRegistrationByIdResponse {
 
 export async function getPreRegistrationById(id: string): Promise<GetPreRegistrationByIdResponse> {
   
-  const supabase = createServiceClient();
+  const supabase = createClient();
 
   if (!supabase) return { success: false };
 
