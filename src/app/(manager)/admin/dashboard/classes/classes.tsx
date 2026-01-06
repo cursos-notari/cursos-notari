@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { use, useMemo, Suspense, useCallback } from "react";
 import { Class } from "@/types/interfaces/database/class";
@@ -10,7 +10,7 @@ import { useClassOperations } from "@/hooks/use-class-operations";
 import { TransformedCreateClassFormData } from "@/validation/zod-schemas/create-class-schema";
 import { TransformedUpdateClassFormData } from "@/validation/zod-schemas/update-class-schema";
 
-export default function Dashboard({ classes: classesPromise }: { 
+export default function Classes({ classes: classesPromise }: { 
   classes: Promise<{ 
     data?: Class[] | [], 
     success: boolean 

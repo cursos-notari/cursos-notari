@@ -167,7 +167,7 @@ export async function creditCardCharge({
         return {
           success: false,
           message: errorMessages[status] || (isServerError
-            ? 'Erro temporário no serviço de pagamento. Tente novamente.'
+            ? 'Erro temporário no serviço de pagamento. Tente novamente mais tarde.'
             : 'Erro ao processar pagamento.'),
           retryable: isServerError || status === 401 || status === 429
         };

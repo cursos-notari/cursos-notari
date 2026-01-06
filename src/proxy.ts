@@ -18,8 +18,8 @@ export async function proxy(req: NextRequest) {
 
   if (user) {
     
-    if (path === "/admin/login" || path === "/admin") {
-      return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+    if (path === "/admin/login" || path === "/admin" || path ==='/admin/dashboard') {
+      return NextResponse.redirect(new URL("/admin/dashboard/classes", req.url));
     }
     
     return supabaseResponse;
