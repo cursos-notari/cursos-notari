@@ -1,16 +1,6 @@
-"use client"
+import { BookMarked, CalendarCheck } from "lucide-react"
 
-import * as React from "react"
-import {
-  CalendarCheck,
-} from "lucide-react"
-
-import {
-  IconBuilding,
-  IconDashboard,
-} from "@tabler/icons-react"
-
-import { NavUser } from "@/components/manager/nav-user"
+import { NavUserWrapper } from "@/components/manager/nav-user-wrapper"
 import { TeamSwitcher } from "@/components/manager/team-switcher"
 import {
   Sidebar,
@@ -24,24 +14,15 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { Suspense } from "react"
+import { SidebarNavSkeleton } from "../skeletons/sidebar-nav-skeleton"
 
 const data = {
-  user: {
-    name: "Leandro Notari",
-    email: "engenier2014@gmail.com",
-    avatar: "/img/leandro.jpeg",
-  },
-  team:
-  {
-    name: "Engenharia Notari",
-    logo: IconBuilding,
-    plan: "Empresa",
-  },
   items: [
     {
       title: "Turmas",
       url: "#",
-      icon: IconDashboard,
+      icon: BookMarked,
       isActive: true,
     },
     {
@@ -57,7 +38,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher team={data.team} />
+        <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -84,7 +65,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <Suspense fallback={<SidebarNavSkeleton />}>
+          <NavUserWrapper />
+        </Suspense>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

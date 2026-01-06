@@ -10,7 +10,13 @@ import { useClassOperations } from "@/hooks/use-class-operations";
 import { TransformedCreateClassFormData } from "@/validation/zod-schemas/create-class-schema";
 import { TransformedUpdateClassFormData } from "@/validation/zod-schemas/update-class-schema";
 
-export default function Dashboard({ classes: classesPromise }: { classes: Promise<Class[]> }) {
+export default function Dashboard({ classes: classesPromise }: { 
+  classes: Promise<{ 
+    data?: Class[] | [], 
+    success: boolean 
+  }> 
+}) {
+  
   const allClasses = use(classesPromise);
 
   const {
@@ -50,7 +56,7 @@ export default function Dashboard({ classes: classesPromise }: { classes: Promis
 
   // memoiza array de cards para prevenir re-renders desnecessários
   const classCards = useMemo(() => {
-    return allClasses.map((classItem) => {
+    return allClasses?.data?.map((classItem) => {
       const handleEdit = () => openEditDialog(classItem);
       const handleDeleteClick = () => openDeleteDialog(classItem);
 
@@ -67,7 +73,7 @@ export default function Dashboard({ classes: classesPromise }: { classes: Promis
   }, [allClasses, isPending, openEditDialog, openDeleteDialog]);
 
   return (
-    <div className="grid auto-rows-[minmax(17rem,_auto)] gap-4 md:grid-cols-3 lg:grid-cols-4">
+    <div className="grid auto-rows-[minmax(17rem,auto)] gap-4 md:grid-cols-3 lg:grid-cols-4">
       {/* card para criar turma */}
       <CreateClassCard onClick={openCreateDialog} />
 

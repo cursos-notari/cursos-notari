@@ -1,12 +1,12 @@
 import { PersonalDataFormSchema } from "@/validation/zod-schemas/personal-data-form-schema"
 
 export const PERSONAL_DATA_MOCK = {
-  name: 'Pedro Lucas',
-  surname: 'Almeida Cunha',
-  cpf: '56267721892',
-  email: 'pedrolucasalmeida7@hotmail.com',
-  birthdate: new Date('11-21-2006'),
-  phone: '11961842002',
+  name: 'João Pedro',
+  surname: 'Silva Bispo',
+  cpf: '45042936092',
+  email: 'joaoalmeida7@hotmail.com',
+  birthdate: new Date('11-25-2006'),
+  phone: '11935356604',
   street: 'Rua Principal',
   number: '123',
   complement: '',
