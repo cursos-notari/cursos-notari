@@ -1,7 +1,7 @@
 'use server'
 import 'server-only';
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/service";
 import { Order } from '@/types/interfaces/payment/pagbank/order';
 
 export interface ConfirmPaymentResult {
@@ -18,10 +18,10 @@ export async function confirmPayment({
   orderId: string;
   order: Order;
 }): Promise<ConfirmPaymentResult> {
-  
-  const supabase = await createClient();
 
-  if (!supabase) { return { success: false } }
+  const supabase = createClient();
+
+  if (!supabase) { return { success: false } };
 
   const { data, error } = await supabase.rpc('confirm_payment', {
     p_id: preRegistrationId,
@@ -31,12 +31,10 @@ export async function confirmPayment({
 
   if (error) {
     console.error("Erro ao chamar RPC confirm_payment:", error);
-    return {
-      success: false,
-    };
+    return { success: false };
   }
 
   if (!data.success) { return { success: false } };
 
-  return { success: true }
+  return { success: true };
 }
