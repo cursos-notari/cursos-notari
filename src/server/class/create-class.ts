@@ -3,14 +3,17 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { TransformedCreateClassFormData } from '@/validation/zod-schemas/create-class-schema';
+import { redirect } from 'next/navigation';
 
 export async function createClassAction(classData: TransformedCreateClassFormData) {
   
   const supabase = await createClient();
 
+  if(!supabase) throw new Error("Ocorreu um erro interno ao tentar criar a turma.");
+
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) throw new Error('Usuário não autenticado');
+  if (!user) redirect('/admin/login');
 
   const params = {
     p_name: classData.className,
@@ -22,7 +25,7 @@ export async function createClassAction(classData: TransformedCreateClassFormDat
     p_address: classData.address,
     p_status: classData.status,
     p_schedules: classData.classDays.map(d => d.toISOString())
-  }
+  };
 
   const { data: newId, error } = await supabase.rpc('create_class_with_schedules', params);
 

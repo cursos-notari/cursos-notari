@@ -10,24 +10,25 @@ import { TransformedCreateClassFormData } from '@/validation/zod-schemas/create-
 import { TransformedUpdateClassFormData } from '@/validation/zod-schemas/update-class-schema'
 
 export function useClassOperations() {
+
   const [isPending, startTransition] = useTransition();
 
   const createClass = useCallback(async (classData: TransformedCreateClassFormData): Promise<boolean> => {
     return new Promise((resolve) => {
       startTransition(async () => {
         try {
-          await createClassAction(classData)
+          await createClassAction(classData);
           toast.success('Turma criada com sucesso!', {
             description: classData.className,
             position: 'top-right'
-          })
-          resolve(true)
+          });
+          resolve(true);
         } catch (error: any) {
+          console.error('Erro ao criar turma:', error);
           toast.error(error.message || 'Erro inesperado ao criar turma', {
             position: 'top-right'
-          })
-          console.error('Erro ao criar turma:', error)
-          resolve(false)
+          });
+          resolve(false);
         }
       })
     })
@@ -43,14 +44,14 @@ export function useClassOperations() {
           toast.success('Turma atualizada com sucesso!', {
             description: classData.className,
             position: 'top-right'
-          })
-          resolve(true)
+          });
+          resolve(true);
         } catch (error: any) {
           toast.error(error.message || 'Erro inesperado ao atualizar turma', {
             position: 'top-right'
-          })
-          console.error('Erro ao atualizar turma:', error)
-          resolve(false)
+          });
+          console.error('Erro ao atualizar turma:', error);
+          resolve(false);
         }
       })
     })
@@ -60,24 +61,24 @@ export function useClassOperations() {
     return new Promise((resolve) => {
       startTransition(async () => {
         try {
-          const result = await deleteClassAction(classData.id)
+          const result = await deleteClassAction(classData.id);
 
           if (result.success) {
             toast.success(`Turma "${classData.name}" deletada com sucesso!`, {
               position: 'top-right'
-            })
-            resolve(true)
+            });
+            resolve(true);
           } else {
             toast.error(result.message, {
               position: 'top-right'
-            })
-            resolve(false)
+            });
+            resolve(false);
           }
         } catch (error) {
           toast.error('Erro inesperado ao deletar turma', {
             position: 'top-right'
-          })
-          resolve(false)
+          });
+          resolve(false);
         }
       })
     })

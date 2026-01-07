@@ -2,7 +2,6 @@
 
 import { useCallback, useReducer } from 'react'
 import { Class } from '@/types/interfaces/database/class'
-import { useClassOperations } from './use-class-operations'
 
 // types
 type DialogType = 'create' | 'edit' | 'delete' | null
@@ -65,8 +64,7 @@ const dashboardReducer = (state: DashboardState, action: DashboardAction): Dashb
         }
       }
 
-    default:
-      return state
+    default: return state
   }
 }
 
@@ -81,6 +79,7 @@ const initialState: DashboardState = {
 
 // hook
 export function useDashboard() {
+
   const [state, dispatch] = useReducer(dashboardReducer, initialState)
 
   const openCreateDialog = useCallback(() => {

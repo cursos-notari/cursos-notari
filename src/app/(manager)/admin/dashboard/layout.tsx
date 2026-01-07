@@ -1,12 +1,13 @@
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/manager/app-sidebar"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  description: 'Gerencie as turmas',
+}
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

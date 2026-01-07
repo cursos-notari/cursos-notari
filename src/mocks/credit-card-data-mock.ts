@@ -1,5 +1,5 @@
 export const CREDIT_CARD_DATA_MOCK = {
-  holderName: 'PEDRO LUCAS ALMEIDA CUNHA',
+  holderName: 'JOAO PEDRO S BISPO',
   cardNumber: '4539620659922097',
   cvv: '123',
   expirationDate: '12/30',
