@@ -15,7 +15,7 @@ interface CreditCardStore {
 
 const useCreditCardData = create<CreditCardStore>()(
   immer((set) => ({
-    creditCardData: CREDIT_CARD_DATA_MOCK,
+    creditCardData: EMPTY_CREDIT_CARD_DATA_MOCK,
 
     setCreditCardData: (data) =>
       set((state) => {

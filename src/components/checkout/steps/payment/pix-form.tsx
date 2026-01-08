@@ -17,22 +17,19 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useCheckoutSteps } from '@/hooks/zustand/use-checkout-steps'
 import usePixData from '@/hooks/zustand/use-pix-data'
-import { useSyncFormWithStore } from '@/hooks/use-sync-form-with-store'
 import { PersonalDataFormSchema } from '@/validation/zod-schemas/personal-data-form-schema'
 
 export default function PixForm() {
 
-  const pixData = usePixData(state => state.pixData);
-  const updateField = usePixData(state => state.updatePixDataField);
   const resetPixData = usePixData(state => state.resetPixData);
 
   const form = useForm<PixFormSchema>({
     resolver: zodResolver(pixFormSchema),
-    defaultValues: pixData
+    defaultValues: {
+      acceptContract: false,
+      acceptPolicy: false,
+    }
   });
-
-  // Sincroniza o formulário com o Zustand
-  useSyncFormWithStore(form.watch, updateField);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -52,7 +49,7 @@ export default function PixForm() {
       });
       return;
     }
-    
+
     try {
       const preRegistration = await createPreRegistration({
         classId: classData.id,
@@ -82,15 +79,15 @@ export default function PixForm() {
         throw new Error('Ocorreu um erro ao processar o pagamento pix.');
       }
 
-      // Reseta os dados do PIX após sucesso
       resetPixData();
+      form.reset();
       router.push(`${pathname}/congrats`);
 
     } catch (error: any) {
       toast.error(
-        error instanceof Error 
-          ? error.message 
-          : 'Erro ao processar pagamento. Tente novamente mais tarde', 
+        error instanceof Error
+          ? error.message
+          : 'Erro ao processar pagamento. Tente novamente mais tarde',
         { position: 'top-center' }
       );
     }

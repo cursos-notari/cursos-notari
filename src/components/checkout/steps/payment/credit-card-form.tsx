@@ -23,13 +23,11 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
 import SuccessAnimation from '@/components/animations/payment-accepted';
-import { processPixPayment } from '@/server/payment/process-pix-payment';
 import { fieldError } from '@/constants/code-field-map';
 import { useCheckoutSteps } from '@/hooks/zustand/use-checkout-steps';
-import useCreditCardData from '@/hooks/zustand/use-credit-card';
-import { useSyncFormWithStore } from '@/hooks/use-sync-form-with-store';
-import { PersonalDataFormSchema, personalDataFormSchema } from '@/validation/zod-schemas/personal-data-form-schema';
+import { PersonalDataFormSchema } from '@/validation/zod-schemas/personal-data-form-schema';
 import { processCreditCardPayment } from '@/server/payment/process-credit-card-payment';
+import { CREDIT_CARD_DATA_MOCK } from '@/mocks/credit-card-data-mock';
 
 const Cards = dynamic(() => import('react-credit-cards-2'), {
   ssr: false, // renderiza direto no cliente
@@ -48,10 +46,6 @@ const CreditCardForm = React.memo(function CreditCardForm() {
   const { classData } = useClassData();
 
   const personalData = usePersonalData(state => state.personalData);
-
-  const creditCardData = useCreditCardData(state => state.creditCardData);
-  const updateField = useCreditCardData(state => state.updateCreditCardDataField);
-  const resetCreditCardData = useCreditCardData(state => state.resetCreditCardData);
   
   const goToStep = useCheckoutSteps((state) => state.goToStep);
   const setPendingErrors = useCheckoutSteps(state => state.setPendingErrors);
@@ -61,9 +55,9 @@ const CreditCardForm = React.memo(function CreditCardForm() {
 
   const form = useForm<TPaymentCardSchema>({
     resolver: zodResolver(paymentCardSchema),
-    defaultValues: creditCardData
-      ? creditCardData
-      : {
+    defaultValues: 
+      CREDIT_CARD_DATA_MOCK ||
+      {
         holderName: '',
         cardNumber: '',
         cvv: '',
@@ -73,8 +67,6 @@ const CreditCardForm = React.memo(function CreditCardForm() {
         acceptContract: false
       }
   });
-
-  useSyncFormWithStore(form.watch, updateField);
 
   // memoização de cálculos caros
   const installmentOptions = useMemo(() =>
@@ -133,7 +125,6 @@ const CreditCardForm = React.memo(function CreditCardForm() {
       if (!res.success) throw new Error(res.message);
 
       setPaymentAccepted(true);
-      resetCreditCardData();
       form.reset({
         holderName: '',
         cardNumber: '',
