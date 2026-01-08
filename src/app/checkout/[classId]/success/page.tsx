@@ -1,10 +1,10 @@
 import { getPreRegistrationById } from '@/server/pre-registration/get-pre-registration-by-id';
-import { setTimeout } from 'node:timers/promises';
 import { cookies } from 'next/headers'
 import { Suspense } from 'react'
 import Image from 'next/image';
-import { redirect } from 'next/navigation';
-import { Check, CheckCircle, Mail } from 'lucide-react';
+import { notFound, redirect } from 'next/navigation';
+import { Mail } from 'lucide-react';
+import { isValidUUID } from '@/utils/is-valid-UUID';
 
 const FallBack = () => (
   <div className='w-screen h-screen flex items-center justify-center'>
@@ -18,17 +18,26 @@ const FallBack = () => (
       />
     </div>
   </div>
-)
+);
 
-export default function SuccessPage() {
+type SuccessPageProps = {
+  params: Promise<{ classId: string }>
+}
+
+export default function SuccessPage({ params }: SuccessPageProps) {
   return (
     <Suspense fallback={<FallBack />}>
-      <SuccessContent />
+      <SuccessContent params={params} />
     </Suspense>
   )
 }
 
-async function SuccessContent() {
+async function SuccessContent({ params }: SuccessPageProps) {
+
+  const { classId } = await params;
+
+  if(!isValidUUID(classId)) notFound();
+
   const cookieStore = await cookies();
   const preRegistrationId = cookieStore.get('pre_registration_id')?.value;
 
@@ -36,9 +45,16 @@ async function SuccessContent() {
 
   const preRegistration = await getPreRegistrationById(preRegistrationId);
 
-  if (!preRegistration.data) {
-    return <p>erro ao carregar dados</p>
-  }
+  if (!preRegistration.success) throw new Error("Erro ao acessar o pré-registro.");
+
+  if (!preRegistration.data) redirect('/');
+
+  if (preRegistration.data.class_id !== classId) notFound();
+
+  // verifica se o pagamento foi confirmado
+  if (preRegistration.data.status !== 'confirmed'){
+    redirect(`/checkout/${preRegistration.data.class_id}`);
+  } 
 
   const { name, email } = preRegistration.data;
 
@@ -70,7 +86,7 @@ async function SuccessContent() {
             <ul className='list-disc list-inside space-y-2 text-gray-700 text-sm'>
               <li>Verifique sua caixa de entrada (e spam) para ver seus ingressos.</li>
               <li>Apresente os ingressos nos dias de aula.</li>
-              <li>Em caso de dúvidas, entre em contato através do WhatsApp: .</li>
+              <li>Em caso de dúvidas, entre em contato através do WhatsApp: <span className='font-semibold'>119XXXX-XXXX</span>.</li>
             </ul>
           </div>
         </div>

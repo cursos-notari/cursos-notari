@@ -1,11 +1,10 @@
 import { getPreRegistrationById } from '@/server/pre-registration/get-pre-registration-by-id';
 import PixDisplay from '@/components/checkout/steps/payment/pix-display';
-import { setTimeout } from 'node:timers/promises';
 import { cookies } from 'next/headers'
 import { Suspense } from 'react'
 import Image from 'next/image';
-import { redirect } from 'next/navigation';
-import PixIcon from '@/components/icons/pix-icon';
+import { notFound, redirect } from 'next/navigation';
+import { isValidUUID } from '@/utils/is-valid-UUID';
 
 const FallBack = () => (
   <div className='w-screen h-screen flex items-center justify-center'>
@@ -21,15 +20,24 @@ const FallBack = () => (
   </div>
 )
 
-export default function CongratsPage() {
+type CongratsPageProps = {
+  params: Promise<{ classId: string }>
+}
+
+export default async function CongratsPage({ params }: CongratsPageProps) {
   return (
     <Suspense fallback={<FallBack />}>
-      <CongratsContent />
+      <CongratsContent params={params} />
     </Suspense>
   )
 }
 
-async function CongratsContent() {
+async function CongratsContent({ params }: CongratsPageProps) {
+
+  const { classId } = await params;
+
+  if(!isValidUUID(classId)) notFound();
+
   const cookieStore = await cookies();
   const preRegistrationId = cookieStore.get('pre_registration_id')?.value;
 
@@ -37,8 +45,15 @@ async function CongratsContent() {
 
   const preRegistration = await getPreRegistrationById(preRegistrationId);
 
-  if (!preRegistration.data) {
-    return <p>erro ao carregar dados</p>
+  if (!preRegistration.success) throw new Error("Erro ao acessar o pré-registro.");
+
+  if (!preRegistration.data) redirect('/');
+
+  if (preRegistration.data.class_id !== classId) notFound();
+
+  // Se já foi confirmado, redireciona para success
+  if (preRegistration.data.status === 'confirmed') {
+    redirect(`/checkout/${preRegistration.data.class_id}/success`);
   }
 
   const { name, pagbank_order_data } = preRegistration.data;
