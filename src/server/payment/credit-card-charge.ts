@@ -61,7 +61,7 @@ export async function creditCardCharge({
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.PAGBANK_API_TOKEN}`,
       },
-      timeout: 30000
+      timeout: 10000
     });
 
     const data = response.data;

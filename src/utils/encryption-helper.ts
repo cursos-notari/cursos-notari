@@ -36,9 +36,7 @@ const encryptCard = (cardData: TPaymentCardSchema): Card => {
 
     const publicKey = process.env.NEXT_PUBLIC_PAGBANK_SANDBOX_API_PUBLIC_KEY;
 
-    if (!publicKey) {
-      throw new Error('Chave pública do PagBank não encontrada.');
-    }
+    if (!publicKey) { throw new Error('Chave pública do PagBank não encontrada.') };
 
     const formatedCardData = formatCardData(cardData);
 

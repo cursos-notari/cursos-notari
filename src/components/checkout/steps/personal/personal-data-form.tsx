@@ -153,8 +153,14 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                       <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Nome*</FormLabel>
                       <FormControl>
                         <Input className='selection:bg-sky-500'
-                          placeholder="Digite seu nome"
                           {...field}
+                          placeholder="Digite seu nome"
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
+                            field.onChange(value);
+                          }}
+                          maxLength={50}
+                          minLength={2}
                         />
                       </FormControl>
                       <FormMessage className='text-xs' />
@@ -170,8 +176,14 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                       <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Sobrenome*</FormLabel>
                       <FormControl>
                         <Input className='selection:bg-sky-500'
-                          placeholder="Digite seu sobrenome"
                           {...field}
+                          placeholder="Digite seu sobrenome"
+                           onChange={(e) => {
+                            const value = e.target.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
+                            field.onChange(value);
+                          }}
+                          minLength={2}
+                          maxLength={50}
                         />
                       </FormControl>
                       <FormMessage className='text-xs' />
@@ -199,8 +211,8 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                             placeholder="Selecione sua data de nascimento"
                             captionLayout="dropdown"
                             startMonth={new Date(1940, 0)}
-                            endMonth={new Date(2008, 11)}
-                            defaultMonth={field.value || new Date(2008, 11)}
+                            endMonth={new Date(2009, 11)}
+                            defaultMonth={field.value || new Date(2009, 11)}
                           />
                         </FormControl>
                         <FormDescription className={`text-xs ${isAgeError ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
@@ -227,6 +239,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                             const unformatted = e.target.value.replace(/\D/g, '')
                             field.onChange(unformatted)
                           }}
+                          minLength={14}
                           maxLength={14}
                         />
                       </FormControl>
@@ -253,6 +266,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                             const unformatted = e.target.value.replace(/\D/g, '');
                             field.onChange(unformatted);
                           }}
+                          minLength={15}
                           maxLength={15}
                         />
                       </FormControl>
@@ -306,6 +320,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                             field.onChange(formatted.replace(/\D/g, ''));
                           }}
                           value={formatCEP(field.value)}
+                          minLength={9}
                           maxLength={9}
                         />
                       </FormControl>
@@ -322,9 +337,15 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                       <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Rua*</FormLabel>
                       <FormControl>
                         <Input className='selection:bg-sky-500'
+                          {...field}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^a-zA-Z0-9À-ÿ\s.'-]/g, '');
+                            field.onChange(value);
+                          }}
                           placeholder="Nome da rua"
                           disabled={isFetchingAddress}
-                          {...field}
+                          minLength={5}
+                          maxLength={100}
                         />
                       </FormControl>
                       <FormMessage className='text-xs' />
@@ -396,6 +417,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                         <Input className='selection:bg-sky-500'
                           placeholder="Apto, bloco, etc. (opcional)"
                           {...field}
+                          maxLength={50}
                         />
                       </FormControl>
                       <FormMessage className='text-xs' />
@@ -405,12 +427,12 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
               </div>
 
               {/* bairro, cidade e estado */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                 <FormField
                   control={form.control}
                   name="locality"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="md:col-span-2">
                       <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Bairro*</FormLabel>
                       <FormControl>
                         <Input className='selection:bg-sky-500'
@@ -420,6 +442,8 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                           onChange={(e) => {
                             field.onChange(e.target.value.replace(/[0-9]/g, ''))
                           }}
+                          minLength={2}
+                          maxLength={50}
                         />
                       </FormControl>
                       <FormMessage className='text-xs' />
@@ -431,7 +455,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                   control={form.control}
                   name="regionCode"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="md:col-span-1">
                       <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>UF*</FormLabel>
                       <FormControl>
                         <Input
@@ -452,7 +476,7 @@ export default function PersonalDataForm({ onNext }: { onNext: () => void }) {
                   control={form.control}
                   name="city"
                   render={({ field, fieldState }) => (
-                    <FormItem>
+                    <FormItem className="md:col-span-3">
                       <FormLabel className='text-linear bg-linear-to-tr linear-colors font-medium!'>Cidade*</FormLabel>
                       <FormControl>
                         {isLoadingCities ? (

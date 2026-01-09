@@ -56,7 +56,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
   const form = useForm<TPaymentCardSchema>({
     resolver: zodResolver(paymentCardSchema),
     defaultValues: 
-      CREDIT_CARD_DATA_MOCK ||
+      // CREDIT_CARD_DATA_MOCK ||
       {
         holderName: '',
         cardNumber: '',
@@ -98,7 +98,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
           goToStep(1);
         }
         throw new Error(
-          preRegistration.message || 'Ocorreu um erro interno ao criar seu registro'
+          preRegistration.message || 'Ocorreu um erro ao criar seu registro'
         );
       }
 
@@ -173,6 +173,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                             <Input
                               {...field}
                               placeholder="0000 0000 0000 0000"
+                              minLength={19}
                               maxLength={19}
                               onChange={(e) => field.onChange(formatCardNumber(e.target.value))}
                               onFocus={() => setFocused('number')}
@@ -204,6 +205,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                             <Input
                               {...field}
                               placeholder="MM/AA"
+                              minLength={5}
                               maxLength={5}
                               onChange={(e) => {
                                 let value = e.target.value.replace(/\D/g, '');
@@ -234,6 +236,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                             <Input
                               {...field}
                               placeholder="123"
+                              minLength={3}
                               maxLength={4}
                               onChange={(e) => field.onChange(e.target.value.replace(/\D/g, ''))}
                               onFocus={() => setFocused('cvc')}
@@ -259,7 +262,12 @@ const CreditCardForm = React.memo(function CreditCardForm() {
                           <Input
                             {...field}
                             placeholder="Nome como está no cartão"
-                            onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
+                              field.onChange(value.toUpperCase())
+                            }}
+                            minLength={2}
+                            maxLength={50}
                             onFocus={() => setFocused('name')}
                             onBlur={() => setFocused(undefined)}
                             className="selection:bg-sky-500 selection:text-white"
