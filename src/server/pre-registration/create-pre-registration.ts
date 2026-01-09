@@ -74,7 +74,8 @@ export async function createPreRegistration({ classId, personalData }: CreatePre
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 60 * 15
+    maxAge: 60 * 15,
+    path: '/checkout'
   });
 
   return result;

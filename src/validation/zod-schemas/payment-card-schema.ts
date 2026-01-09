@@ -78,24 +78,28 @@ const isCardNotExpired = (expiryDate: string): boolean => {
 export const paymentCardSchema = z.object({
   holderName: z
     .string()
+    .trim()
     .nonempty("Informe o nome do titular")
-    .min(3, "Digite o nome como está no cartão")
+    .min(2, "Digite o nome como está no cartão")
     .max(50, "Nome muito longo")
     .regex(/^[a-zA-ZÀ-ÿ\s]+$/, "O nome deve conter apenas letras e espaços"),
 
   cardNumber: z
     .string()
+    .trim()
     .nonempty("Informe o número do cartão")
     .min(16, "O número precisa ter pelo menos 16 dígitos")
     .refine(validateCardNumberLuhn, "Número do cartão inválido"),
 
   cvv: z
     .string()
+    .trim()
     .min(1, "Informe o CVV")
     .regex(/^\d{3,4}$/, "CVV inválido"),
 
   expirationDate: z
     .string()
+    .trim()
     .min(1, "Informe a validade")
     .refine(validateExpiryFormat, "Formato inválido")
     .refine(isCardNotExpired, "Cartão expirado"),
