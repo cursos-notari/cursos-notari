@@ -56,7 +56,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
   const form = useForm<TPaymentCardSchema>({
     resolver: zodResolver(paymentCardSchema),
     defaultValues: 
-      // CREDIT_CARD_DATA_MOCK ||
+      CREDIT_CARD_DATA_MOCK ||
       {
         holderName: '',
         cardNumber: '',
@@ -117,7 +117,7 @@ const CreditCardForm = React.memo(function CreditCardForm() {
 
       const res = await processCreditCardPayment({
         preRegistrationId: preRegistration.id,
-        classData: classData,
+        classId: classData.id,
         installments: creditCardData.installments,
         cardToken: result.encryptedCard
       });
