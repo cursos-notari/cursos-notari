@@ -5,6 +5,7 @@ import { PublicClass } from "@/types/interfaces/database/class";
 import { cacheLife } from "next/cache";
 import { createClient } from "@/lib/supabase/service";
 import { PostgrestError } from "@supabase/supabase-js";
+import { isValidUUID } from "@/utils/is-valid-UUID";
 
 interface GetClassByIdReturn {
   success: boolean;
@@ -18,7 +19,9 @@ export const getClassById = cache(async (classId: string): Promise<GetClassByIdR
 
   cacheLife('seconds');
 
-  const supabase = await createClient();
+  if(!isValidUUID(classId)) return { success: false };
+
+  const supabase = createClient();
 
   if(!supabase) return { 
     success: false,

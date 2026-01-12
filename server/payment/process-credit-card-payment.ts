@@ -6,17 +6,18 @@ import { Order } from "@/types/interfaces/payment/pagbank/order";
 import { isOrderExpired } from "@/utils/is-order-expired";
 import { createPagBankOrder } from "./create-pagbank-order";
 import { creditCardCharge } from "./credit-card-charge";
+import { getClassById } from "@/server/class/get-class-by-id";
 
 interface ProcessCreditCardPaymentParams {
   preRegistrationId: string;
-  classData: PublicClass;
+  classId: string;
   cardToken: any;
   installments: number;
 }
 
 export async function processCreditCardPayment({
   preRegistrationId,
-  classData,
+  classId,
   cardToken,
   installments
 }: ProcessCreditCardPaymentParams) {
@@ -48,8 +49,14 @@ export async function processCreditCardPayment({
       pagBankOrder = existingOrderData;
     } else {
       
+      const classData = await getClassById(classId);
+
+      if(!classData.success || !classData.data) return {
+        success: false
+      } 
+
       const res = await createPagBankOrder({
-        classData,
+        classData: classData.data,
         preRegistrationData: preRegistration.data!
       });
 
