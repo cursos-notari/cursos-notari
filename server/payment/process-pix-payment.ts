@@ -6,6 +6,8 @@ import { getPreRegistrationById } from "../pre-registration/get-pre-registration
 import { PublicClass } from "@/types/interfaces/database/class";
 import { Order } from '@/types/interfaces/payment/pagbank/order';
 import { isOrderExpired } from '@/utils/is-order-expired';
+import { headers } from 'next/headers';
+import { ratelimit } from '@/lib/rate-limit';
 
 interface ProcessPixPaymentParams {
   preRegistrationId: string;
@@ -18,6 +20,16 @@ interface ProcessPixPaymentReturn {
 
 export async function processPixPayment({ preRegistrationId, classData }: ProcessPixPaymentParams): Promise<ProcessPixPaymentReturn> {
   try {
+    const headersList = await headers();
+
+    const ip = headersList.get("x-forwarded-for") ?? "::1";
+
+    const { success, limit, reset, remaining } = await ratelimit.limit(ip);
+
+    if (!success) {
+      throw new Error(`Limite de tentativas excedido. Tente novamente em ${Math.ceil((reset - Date.now()) / 60000)} minutos`);
+    }
+
     const preRegistration = await getPreRegistrationById(preRegistrationId);
 
     if (!preRegistration.data) {

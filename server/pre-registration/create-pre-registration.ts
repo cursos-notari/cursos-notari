@@ -1,8 +1,9 @@
 "use server"
 
+import { ratelimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/service";
 import { PersonalDataFormSchema, personalDataFormSchema } from "@/validation/zod-schemas/personal-data-form-schema";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 export interface CreatePreRegistrationParams {
   personalData: PersonalDataFormSchema
@@ -10,6 +11,16 @@ export interface CreatePreRegistrationParams {
 }
 
 export async function createPreRegistration({ classId, personalData }: CreatePreRegistrationParams) {
+
+  const headersList = await headers();
+
+  const ip = headersList.get("x-forwarded-for") ?? "::1";
+
+  const { success, limit, reset, remaining } = await ratelimit.limit(ip);
+
+  if (!success) {
+    throw new Error(`Limite de tentativas excedido. Tente novamente em ${Math.ceil((reset - Date.now()) / 60000)} minutos`);
+  }
 
   const isValidData = personalDataFormSchema.safeParse(personalData);
 
