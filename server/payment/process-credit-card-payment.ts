@@ -1,12 +1,13 @@
 'use server'
 
-import { PublicClass } from "@/types/interfaces/database/class";
 import { getPreRegistrationById } from "../pre-registration/get-pre-registration-by-id";
 import { Order } from "@/types/interfaces/payment/pagbank/order";
 import { isOrderExpired } from "@/utils/is-order-expired";
 import { createPagBankOrder } from "./create-pagbank-order";
 import { creditCardCharge } from "./credit-card-charge";
 import { getClassById } from "@/server/class/get-class-by-id";
+import { headers } from "next/headers";
+import { ratelimit } from "@/lib/rate-limit";
 
 interface ProcessCreditCardPaymentParams {
   preRegistrationId: string;
@@ -22,6 +23,18 @@ export async function processCreditCardPayment({
   installments
 }: ProcessCreditCardPaymentParams) {
   try {
+    const headersList = await headers();
+
+    const ip = headersList.get("x-forwarded-for") ?? "::1";
+
+    const { success, limit, reset, remaining } = await ratelimit.limit(ip);
+
+    console.log(success); 
+
+    if (!success) {
+      throw new Error(`Limite de tentativas excedido. Tente novamente em ${Math.ceil((reset - Date.now()) / 60000)} minutos`);
+    }
+
     const preRegistration = await getPreRegistrationById(preRegistrationId);
 
     if (!preRegistration.success) return { success: false };
@@ -48,19 +61,19 @@ export async function processCreditCardPayment({
       }
       pagBankOrder = existingOrderData;
     } else {
-      
+
       const classData = await getClassById(classId);
 
-      if(!classData.success || !classData.data) return {
+      if (!classData.success || !classData.data) return {
         success: false
-      } 
+      }
 
       const res = await createPagBankOrder({
         classData: classData.data,
         preRegistrationData: preRegistration.data!
       });
 
-      if (!res.success || !res.data) return { 
+      if (!res.success || !res.data) return {
         success: false,
         message: 'Ocorreu um erro ao criar seu pedido.'
       };
