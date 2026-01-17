@@ -5,9 +5,12 @@ import { TransformedUpdateClassFormData } from '@/validation/zod-schemas/update-
 import { revalidatePath } from 'next/cache'
 
 export async function updateClassAction(classId: string, classData: TransformedUpdateClassFormData) {
-  const supabase = await createClient()
+  
+  const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser()
+  if(!supabase) throw new Error("Ocorreu um erro ao atualizar a turma. Contate o suporte.");
+
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) throw new Error('Usuário não autenticado')
 

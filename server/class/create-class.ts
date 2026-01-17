@@ -9,7 +9,7 @@ export async function createClassAction(classData: TransformedCreateClassFormDat
   
   const supabase = await createClient();
 
-  if(!supabase) throw new Error("Ocorreu um erro interno ao tentar criar a turma.");
+  if(!supabase) throw new Error("Ocorreu um erro ao criar a turma. Contate o suporte.");
 
   const { data: { user } } = await supabase.auth.getUser();
 

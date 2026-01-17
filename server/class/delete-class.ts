@@ -7,6 +7,8 @@ export async function deleteClassAction(classId: string) {
   try {
     const supabase = await createClient();
 
+    if(!supabase) throw new Error("Ocorreu um erro ao deletar a turma. Contate o suporte.");
+
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) throw new Error("Usuário não autenticado. Ação negada.");
