@@ -10,7 +10,7 @@ export const getOpenClasses = cache(async (): Promise<PublicClass[]> => {
 
   cacheLife("seconds");
 
-  const supabase = await createClient();
+  const supabase = createClient();
 
   if (!supabase) return [];
 

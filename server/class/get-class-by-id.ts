@@ -23,12 +23,7 @@ export const getClassById = cache(async (classId: string): Promise<GetClassByIdR
 
   const supabase = createClient();
 
-  if(!supabase) return { 
-    success: false,
-    error: {
-      message: "Ocorreu um erro ao tentar criar cliente Supabase"
-    }
-  }
+  if(!supabase) return { success: false };
 
   const { data, error } = await supabase
     .from('open_classes')
