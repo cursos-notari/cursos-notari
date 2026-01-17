@@ -5,6 +5,8 @@ export async function getUserRole(): Promise<RoleType | null> {
 
   const supabase = createClient();
 
+  if(!supabase) return null;
+
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) return null;
